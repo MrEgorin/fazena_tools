@@ -1,0 +1,12 @@
+streamlit
+pandas
+numpy
+rdkit
+biopython
+openmm
+pdbfixer
+py3dmol
+stmol
+scikit-learn
+scipy
+networkx
