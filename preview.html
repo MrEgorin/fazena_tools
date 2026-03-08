@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RNA Hunter | FAZENA — Design Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+    rel="stylesheet" />
+  <style>
+    /* ═══════════════════════════════════════════════════════════
+   FAZENA Design System — RNA Hunter Beta (Preview)
+   ═══════════════════════════════════════════════════════════ */
+    :root {
+      --fz-bg-primary: #1D1D1D;
+      --fz-bg-secondary: #242424;
+      --fz-bg-card: #282828;
+      --fz-bg-card-hover: #2F2F2F;
+      --fz-accent: #DA752D;
+      --fz-accent-glow: rgba(218, 117, 45, 0.25);
+      --fz-accent-glow-s: rgba(218, 117, 45, 0.10);
+      --fz-text: #FEFEFE;
+      --fz-text-muted: rgba(254, 254, 254, 0.60);
+      --fz-text-dim: rgba(254, 254, 254, 0.40);
+      --fz-border: rgba(255, 255, 255, 0.07);
+      --fz-border-hover: rgba(255, 255, 255, 0.13);
+      --fz-radius-card: 16px;
+      --fz-radius-btn: 6px;
+      --fz-radius-input: 8px;
+      --fz-font-heading: 'Audiowide', sans-serif;
+      --fz-font-body: 'Inter', sans-serif;
+      --fz-font-mono: 'JetBrains Mono', monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    ::selection {
+      background: var(--fz-accent);
+      color: #fff;
+    }
+
+    body {
+      background: var(--fz-bg-primary);
+      color: var(--fz-text);
+      font-family: var(--fz-font-body);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--fz-bg-primary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    /* ═══════════════════════════ LAYOUT ═══════════════════════════ */
+    .layout {
+      display: flex;
+      width: 100%;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px;
+      min-width: 260px;
+      background: var(--fz-bg-primary);
+      border-right: 1px solid var(--fz-border);
+      padding: 1.5rem 1rem;
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 100;
+      overflow-y: auto;
+    }
+
+    .sidebar-logo {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      background: var(--fz-bg-card);
+      border: 1px solid var(--fz-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .sidebar-app-name {
+      font-family: var(--fz-font-heading);
+      color: var(--fz-accent);
+      font-size: 1.2rem;
+      margin-bottom: 2px;
+      letter-spacing: 1px;
+    }
+
+    .sidebar-powered {
+      color: var(--fz-text-dim);
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: var(--fz-border);
+      margin: 1rem 0;
+    }
+
+    /* Nav items */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 10px;
+      color: var(--fz-text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+      margin-bottom: 2px;
+      transition: all 0.25s ease;
+      border: none;
+      background: transparent;
+      width: 100%;
+      text-align: left;
+    }
+
+    .nav-item:hover {
+      color: var(--fz-text);
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .nav-item.active {
+      color: var(--fz-text);
+      background: rgba(255, 255, 255, 0.04);
+      border-left: 3px solid var(--fz-accent);
+      padding-left: 11px;
+    }
+
+    .version-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      font-size: 0.65rem;
+      font-family: var(--fz-font-mono);
+      letter-spacing: 0.5px;
+      background: rgba(234, 116, 20, 0.08);
+      color: var(--fz-accent);
+      border: 1px solid rgba(234, 116, 20, 0.15);
+    }
+
+    .sidebar-version {
+      margin-top: auto;
+      padding-top: 1rem;
+    }
+
+    .sidebar-version p {
+      color: var(--fz-text-dim);
+      font-size: 0.75rem;
+      margin-top: 10px;
+      line-height: 1.6;
+    }
+
+    /* ── MAIN CONTENT ── */
+    .main {
+      margin-left: 260px;
+      flex: 1;
+      padding: 2.5rem 2.5rem 3rem;
+      max-width: calc(100vw - 260px);
+    }
+
+    /* ── PAGE VISIBILITY ── */
+    .page {
+      display: none;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    /* ═══════════════════════════ TYPOGRAPHY ═══════════════════════════ */
+    h1 {
+      font-family: var(--fz-font-heading);
+      font-size: 1.8rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border-left: 4px solid var(--fz-accent);
+      padding-left: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h2 {
+      font-family: var(--fz-font-heading);
+      font-size: 1.2rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    h3 {
+      font-family: var(--fz-font-heading);
+      font-size: 0.9rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+    }
+
+    .subtitle {
+      color: var(--fz-text-muted);
+      font-size: 1.05rem;
+      margin-bottom: 2.5rem;
+      line-height: 1.7;
+    }
+
+    /* ═══════════════════════════ HERO TITLE ═══════════════════════════ */
+    .hero-title {
+      font-family: var(--fz-font-heading);
+      font-size: 2.4rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #ffffff 0%, var(--fz-accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.25rem;
+      border: none;
+      padding: 0;
+    }
+
+    /* ═══════════════════════════ CARDS ═══════════════════════════ */
+    .fazena-card {
+      background: var(--fz-bg-card);
+      border: 1px solid var(--fz-border);
+      border-radius: var(--fz-radius-card);
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .fazena-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: var(--fz-radius-card);
+      background: linear-gradient(135deg, var(--fz-accent-glow-s), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    .fazena-card:hover {
+      border-color: var(--fz-border-hover);
+      background: var(--fz-bg-card-hover);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .4);
+    }
+
+    .fazena-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Capability / Feature cards */
+    .capability-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .capability-card {
+      background: var(--fz-bg-card);
+      border: 1px solid var(--fz-border);
+      border-radius: var(--fz-radius-card);
+      padding: 1.5rem;
+      transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .capability-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: var(--fz-radius-card);
+      background: linear-gradient(135deg, var(--fz-accent-glow-s), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+    }
+
+    .capability-card:hover {
+      border-color: var(--fz-border-hover);
+      background: var(--fz-bg-card-hover);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, .4);
+      transform: translateY(-2px);
+    }
+
+    .capability-card:hover::before {
+      opacity: 1;
+    }
+
+    .capability-card:hover .cap-icon {
+      transform: scale(1.1);
+    }
+
+    .cap-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: var(--fz-accent-glow-s);
+      border: 1px solid rgba(234, 116, 20, 0.2);
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 0 15px rgba(247, 147, 26, 0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .cap-title {
+      font-family: var(--fz-font-heading);
+      font-size: 0.85rem;
+      color: var(--fz-text);
+      margin-bottom: 0.5rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .cap-desc {
+      font-family: var(--fz-font-body);
+      font-size: 0.85rem;
+      color: var(--fz-text-muted);
+      line-height: 1.6;
+    }
+
+    /* ═══════════════════════════ METRICS ═══════════════════════════ */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+
+    .metrics-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .metrics-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .metric-card {
+      background: var(--fz-bg-card);
+      border: 1px solid var(--fz-border);
+      border-radius: var(--fz-radius-card);
+      padding: 1.25rem;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .metric-card:hover {
+      border-color: var(--fz-border-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .3);
+    }
+
+    .metric-icon {
+      font-size: 1.6rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .metric-value {
+      font-family: var(--fz-font-heading);
+      font-size: 1.4rem;
+      color: var(--fz-accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .metric-label {
+      font-family: var(--fz-font-body);
+      font-size: 0.72rem;
+      color: var(--fz-text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ═══════════════════════════ BUTTONS ═══════════════════════════ */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: transparent;
+      color: var(--fz-text);
+      font-family: var(--fz-font-heading);
+      border: 1px solid var(--fz-accent);
+      border-radius: var(--fz-radius-btn);
+      padding: 0.65rem 2rem;
+      font-size: 0.78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+      width: 100%;
+    }
+
+    .btn:hover {
+      background: var(--fz-accent);
+      color: #000;
+      box-shadow: 0 2px 12px var(--fz-accent-glow), inset 0 0 25px rgba(234, 148, 20, .3);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      border-color: rgba(234, 116, 20, 0.5);
+      font-size: 0.72rem;
+      letter-spacing: 1.5px;
+    }
+
+    /* ═══════════════════════════ INPUTS ═══════════════════════════ */
+    .input-label {
+      display: block;
+      color: var(--fz-text-muted);
+      font-size: 0.82rem;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .input,
+    textarea,
+    select {
+      width: 100%;
+      background: var(--fz-bg-primary);
+      color: var(--fz-text);
+      border: 1px solid var(--fz-border);
+      border-radius: var(--fz-radius-input);
+      padding: 10px 14px;
+      font-family: var(--fz-font-body);
+      font-size: 0.9rem;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      resize: vertical;
+    }
+
+    .input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--fz-accent);
+      box-shadow: 0 0 12px var(--fz-accent-glow);
+    }
+
+    select option {
+      background: var(--fz-bg-secondary);
+    }
+
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin: 8px 0;
+    }
+
+    .radio-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--fz-text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .radio-label input[type="radio"] {
+      accent-color: var(--fz-accent);
+    }
+
+    .radio-label:hover {
+      color: var(--fz-text);
+    }
+
+    /* Columns grid */
+    .col-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .col-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* ═══════════════════════════ STATUS BADGE ═══════════════════════════ */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .status-badge.warning {
+      background: rgba(234, 116, 20, 0.1);
+      color: var(--fz-accent);
+      border: 1px solid rgba(234, 116, 20, 0.2);
+    }
+
+    .status-badge.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    /* ═══════════════════════════ SECTION DIVIDER ═══════════════════════════ */
+    .section-divider {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--fz-border-hover), transparent);
+      margin: 2rem 0;
+    }
+
+    /* ═══════════════════════════ RNA SEQUENCE VIEWER ═══════════════════════════ */
+    .rna-sequence-container {
+      font-family: var(--fz-font-mono);
+      background: var(--fz-bg-primary);
+      padding: 1.5rem;
+      border-radius: var(--fz-radius-input);
+      border: 1px solid var(--fz-border);
+      color: var(--fz-accent);
+      word-break: break-all;
+      line-height: 1.8;
+      font-size: 1rem;
+      margin-top: 1rem;
+      box-shadow: inset 0 0 15px rgba(0, 0, 0, .6);
+    }
+
+    .rna-char {
+      padding: 2px 1px;
+      border-radius: 2px;
+      transition: background-color 0.2s;
+    }
+
+    /* ═══════════════════════════ TABLE ═══════════════════════════ */
+    .results-table-wrap {
+      max-height: 420px;
+      overflow-y: auto;
+      border-radius: var(--fz-radius-card);
+      border: 1px solid var(--fz-border);
+    }
+
+    .results-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      color: var(--fz-text);
+      font-family: var(--fz-font-body);
+    }
+
+    .results-table thead {
+      background: var(--fz-bg-secondary);
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    .results-table th {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--fz-border);
+      font-family: var(--fz-font-heading);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--fz-text-muted);
+    }
+
+    .results-table td {
+      padding: 0.8rem 1rem;
+      border-bottom: 1px solid var(--fz-border);
+      vertical-align: middle;
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(218, 117, 45, 0.1);
+      color: var(--fz-accent);
+      border: 1px solid rgba(218, 117, 45, 0.3);
+      font-family: var(--fz-font-mono);
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .results-table tr:nth-child(even) {
+      background: var(--fz-bg-secondary);
+    }
+
+    .results-table tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .score-cell {
+      font-family: var(--fz-font-heading);
+      color: var(--fz-accent);
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    .smiles-cell {
+      font-family: var(--fz-font-mono);
+      font-size: 0.78rem;
+      color: var(--fz-text-muted);
+      max-width: 180px;
+      word-break: break-all;
+    }
+
+    .admet-cell {
+      font-size: 0.82rem;
+      color: var(--fz-text-muted);
+      line-height: 1.8;
+    }
+
+    .admet-label {
+      color: var(--fz-text-dim);
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Mol preview placeholder */
+    .mol-thumb {
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
+      background: var(--fz-bg-primary);
+      border: 1px solid var(--fz-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--fz-text-dim);
+      font-size: 0.75rem;
+    }
+
+    /* ═══════════════════════════ EXPANDER ═══════════════════════════ */
+    details {
+      background: var(--fz-bg-card);
+      border: 1px solid var(--fz-border);
+      border-radius: var(--fz-radius-card);
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    details summary {
+      padding: 1rem 1.5rem;
+      color: var(--fz-text-muted);
+      cursor: pointer;
+      list-style: none;
+      font-size: 0.9rem;
+      transition: color 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    details summary:hover {
+      color: var(--fz-text);
+    }
+
+    details summary::marker,
+    details summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details summary::after {
+      content: '▾';
+      margin-left: auto;
+      transition: transform 0.3s;
+    }
+
+    details[open] summary::after {
+      transform: rotate(-180deg);
+    }
+
+    details .details-inner {
+      padding: 0 1.5rem 1.5rem;
+    }
+
+    /* ═══════════════════════════ PROGRESS ═══════════════════════════ */
+    .progress-wrap {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 100px;
+      height: 6px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      border-radius: 100px;
+      background: linear-gradient(90deg, var(--fz-accent), #f7931a);
+      width: 70%;
+      animation: grow 1.2s ease-out;
+    }
+
+    @keyframes grow {
+      from {
+        width: 0;
+      }
+
+      to {
+        width: 70%;
+      }
+    }
+
+    /* ═══════════════════════════ FOOTER ═══════════════════════════ */
+    .fazena-footer {
+      text-align: center;
+      padding: 2.5rem 0 0;
+      color: var(--fz-text-dim);
+      font-size: 0.72rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .fazena-footer a {
+      color: var(--fz-accent);
+      text-decoration: none;
+      font-weight: 600;
+      transition: color 0.3s;
+    }
+
+    .fazena-footer a:hover {
+      color: #f7931a;
+    }
+
+    /* ═══════════════════════════ FADE IN ═══════════════════════════ */
+    .fade-in {
+      animation: fadeInUp 0.45s ease-out both;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Status bar at right-top (Streamlit top-right indicator simulation) */
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 260px;
+      right: 0;
+      z-index: 200;
+      background: rgba(6, 6, 7, 0.75);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--fz-border);
+      padding: 0.5rem 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .topbar-title {
+      font-family: var(--fz-font-heading);
+      font-size: 0.7rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--fz-text-dim);
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topbar-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--fz-accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    /* Main padded for topbar */
+    .main {
+      padding-top: 4rem;
+    }
+
+    /* Checkbox */
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--fz-text-muted);
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .checkbox-label input {
+      accent-color: var(--fz-accent);
+    }
+
+    /* Heatmap legend */
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 12px;
+      font-size: 0.75rem;
+      color: var(--fz-text-dim);
+    }
+
+    .heatmap-legend .legend-bar {
+      width: 120px;
+      height: 8px;
+      border-radius: 100px;
+      background: linear-gradient(90deg, transparent, rgba(234, 116, 20, 0.2), rgba(234, 116, 20, 0.7), var(--fz-accent));
+    }
+
+    /* Number input */
+    .num-input-wrap {
+      position: relative;
+    }
+
+    .num-input-wrap input[type="number"] {
+      -moz-appearance: textfield;
+      appearance: textfield;
+      background: var(--fz-bg-primary);
+      color: var(--fz-text);
+      border: 1px solid var(--fz-border);
+      border-radius: var(--fz-radius-input);
+      padding: 8px 12px;
+      font-size: 0.9rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .num-input-wrap input[type="number"]:focus {
+      border-color: var(--fz-accent);
+      box-shadow: 0 0 10px var(--fz-accent-glow);
+    }
+
+    /* Scan line animation for sidebar top */
+    .sidebar-header {
+      position: relative;
+      overflow: hidden;
+      padding-bottom: 2px;
+      margin-bottom: 4px;
+    }
+
+    .scan-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, var(--fz-accent), transparent);
+      animation: scanLine 3s ease-in-out infinite;
+    }
+
+    @keyframes scanLine {
+      0% {
+        transform: translateX(-100%);
+      }
+
+      100% {
+        transform: translateX(100%);
+      }
+    }
+
+    /* Alert / st.success mock */
+    .alert {
+      padding: 0.75rem 1.25rem;
+      border-radius: var(--fz-radius-input);
+      font-size: 0.9rem;
+      margin: 1rem 0;
+    }
+
+    .alert.success {
+      background: rgba(218, 117, 45, 0.1);
+      color: var(--fz-accent);
+      border: 1px solid rgba(218, 117, 45, 0.2);
+    }
+
+    .alert.warning {
+      background: rgba(234, 116, 20, 0.1);
+      color: var(--fz-accent);
+      border: 1px solid rgba(234, 116, 20, 0.2);
+    }
+
+    .alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="layout">
+
+    <!-- ═══════════════════════════ SIDEBAR ═══════════════════════════ -->
+    <nav class="sidebar">
+      <div class="sidebar-header">
+        <div style="margin-bottom: 12px;"><img src="RNAHunterlogo.svg" alt="RNA Hunter"
+            style="width: 80px; height: auto;" /></div>
+        <div class="sidebar-app-name" style="color: var(--fz-text);">RNA Hunter</div>
+        <div class="sidebar-powered">Powered by Foundry-Scale Bio-Models</div>
+        <div class="scan-line"></div>
+      </div>
+
+      <div class="sidebar-divider"></div>
+
+      <button class="nav-item active" onclick="showPage('home', this)"><svg width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+        </svg> Home Dashboard</button>
+      <button class="nav-item" onclick="showPage('screening', this)"><svg width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" />
+        </svg> Virtual Screening</button>
+      <button class="nav-item" onclick="showPage('binding', this)"><svg width="16" height="16" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="9" stroke-dasharray="2 2" />
+          <path d="M12 2v20M2 12h20" />
+          <circle cx="12" cy="12" r="3" fill="var(--fz-accent)" />
+        </svg> Binding Site Prediction</button>
+
+      <div class="sidebar-divider"></div>
+
+      <div class="sidebar-version">
+        <span class="version-badge">v2.1</span>
+        <p>Developer: <span style="color: var(--fz-accent);">FAZENA</span><br>RNAHunter Engine</p>
+      </div>
+    </nav>
+
+    <!-- ═══════════════════════════ TOP BAR ═══════════════════════════ -->
+    <div class="topbar">
+      <span class="topbar-title">RNA Hunter — FAZENA</span>
+      <div class="topbar-right">
+        <span class="topbar-dot"></span>
+        <span
+          style="color: var(--fz-text-dim); font-size: 0.72rem; letter-spacing: 1px; font-family: var(--fz-font-mono);">SYNTHETIC
+          SIMULATION</span>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════ MAIN CONTENT ═══════════════════════════ -->
+    <main class="main">
+
+      <!-- ══════════════ PAGE: HOME ══════════════ -->
+      <div id="page-home" class="page active fade-in">
+        <h1 class="hero-title">RNA Hunter</h1>
+        <p class="subtitle">Advanced Structure-Agnostic RNA Ligand Discovery</p>
+
+        <div class="fazena-card">
+          <h3 style="margin-top: 0; display: flex; align-items: center; gap: 10px;"><span
+              style="color: var(--fz-accent);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg></span> Next-Gen RNA Targeting</h3>
+          <p style="color: var(--fz-text-muted); line-height: 1.8; font-size: 0.95rem; margin-top: 0.5rem;">
+            This revamped version of RNA Hunter leverages a foundation model approach to predict RNA–small molecule
+            interactions without requiring custom 3D structures.
+          </p>
+        </div>
+
+        <div class="capability-grid">
+          <div class="capability-card">
+            <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--fz-accent)"
+                stroke-width="1.5">
+                <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" />
+              </svg></div>
+            <div class="cap-title">Virtual Screening</div>
+            <div class="cap-desc">Screen thousands of small molecules against an RNA sequence without needing custom 3D
+              structures.</div>
+          </div>
+          <div class="capability-card">
+            <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--fz-accent)"
+                stroke-width="1.5">
+                <circle cx="12" cy="12" r="9" stroke-dasharray="2 2" />
+                <path d="M12 2v20M2 12h20" />
+                <circle cx="12" cy="12" r="3" fill="var(--fz-accent)" />
+              </svg></div>
+            <div class="cap-title">Binding Site Prediction</div>
+            <div class="cap-desc">Identify exactly which residues are most likely to interact with a specific drug
+              candidate.</div>
+          </div>
+          <div class="capability-card">
+            <div class="cap-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--fz-accent)"
+                stroke-width="1.5">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10zM12 8v8M8 12h8" />
+              </svg></div>
+            <div class="cap-title">Decoy Enhancement</div>
+            <div class="cap-desc">Validated against HARIBOSS &amp; RNAmigos datasets for robust ligand-specific
+              screening.</div>
+          </div>
+        </div>
+
+        <hr class="section-divider" />
+
+        <h2 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--fz-accent);"><svg
+              width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+              <path d="m19 9-5 5-4-4-3 3" />
+            </svg></span> System Status</h2>
+        <div class="metrics-grid-2" style="margin-top: 1rem;">
+          <div class="fazena-card" style="border-left: 3px solid var(--fz-accent); margin-bottom: 0;">
+            <span class="status-badge warning">● Synthetic Simulation</span>
+            <p style="color: var(--fz-text-muted); margin-top: 0.75rem; font-size: 0.9rem; line-height: 1.6;">
+              Model weights offline. Running in synthetic mode via <code
+                style="color: var(--fz-accent); font-family: var(--fz-font-mono); font-size: 0.85rem;">SMARTBind</code>
+              fallback.
+            </p>
+          </div>
+          <div class="metric-card">
+            <div class="metric-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+                stroke="var(--fz-accent)" stroke-width="1.5">
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 3v2M12 19v2M3 12h2M19 12h2" />
+              </svg></div>
+            <div class="metric-value">RNAHunter</div>
+            <div class="metric-label">Engine</div>
+          </div>
+        </div>
+
+        <div class="fazena-footer">
+          Developed by <a href="https://www.fazena.org" target="_blank">FAZENA</a>
+        </div>
+      </div>
+
+      <!-- ══════════════ PAGE: VIRTUAL SCREENING ══════════════ -->
+      <div id="page-screening" class="page fade-in">
+        <h1>Virtual Target Screening</h1>
+        <p class="subtitle">Screen a library of small molecules against an RNA target to predict binding affinities.</p>
+
+        <!-- Input card -->
+        <div class="fazena-card">
+          <div class="col-2">
+            <div>
+              <h3 style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--fz-accent);"><svg
+                    width="18" height="18" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M150.815 0L160.901 0C163.181 0.913013 165.648 1.1956 167.927 2.05723C176.627 5.3469 183.973 11.9088 187.816 20.4291C189.266 23.6033 190.218 26.9817 190.64 30.4456C191.333 35.9937 190.903 42.4391 191.01 48.0944C191.254 60.969 190.609 74.692 191.188 87.4759C192.454 112.813 199.326 137.553 211.308 159.913C224.218 184.108 242.749 204.85 265.343 220.392C275.329 227.236 284.55 232.164 294.558 239.707C351.742 282.685 386.923 348.809 390.612 420.248C391.293 432.191 391.007 445.089 391.016 457.143C391.021 463.433 391.35 474.232 390.785 480.139C390.509 483.358 389.782 486.522 388.625 489.538C385.312 498.136 378.697 505.135 370.265 508.951C368.183 509.893 362.052 511.475 361.189 512L351.099 512C349.619 511.283 347.389 510.957 345.78 510.476C335.105 507.335 325.843 498.304 322.616 487.606C320.144 479.409 321.155 469.254 321.01 460.653C320.831 450.072 321.177 439.414 320.957 428.82C320.583 414.857 318.523 400.992 314.82 387.524C304.443 349.851 281.548 316.833 249.903 293.907C243.32 289.15 236.658 285.361 229.889 280.975C222.927 276.462 216.212 271.577 209.774 266.343C177.896 240.396 153.227 206.688 138.137 168.455C128.405 143.821 122.728 117.774 121.326 91.3243C120.469 74.5769 121.473 57.8148 120.991 40.922C120.502 23.7554 125.88 9.87253 142.714 2.58691C145.25 1.48965 148.096 1.08011 150.622 0.0787148L150.815 0Z"
+                      fill="var(--fz-accent)" />
+                    <path
+                      d="M221.111 31.0136L312.021 30.9886L341.696 30.9785C349.101 30.9769 359.908 29.6548 365.757 34.6551C368.835 37.2954 370.697 41.0807 370.91 45.13C371.149 49.6923 369.587 53.1805 366.613 56.5187C364.759 58.3778 361.563 60.3503 358.981 60.6721C353.891 61.3067 348.097 61.0929 342.935 61.0904L316.26 61.0755L220.973 61.0834C221.293 51.5109 220.527 40.3575 221.111 31.0136Z"
+                      fill="var(--fz-text)" opacity="0.8" />
+                    <path
+                      d="M221.72 91.1214C221.936 91.1056 222.152 91.0922 222.368 91.0812C231.114 90.6785 242.219 90.9882 251.088 90.9862L305.673 90.9804L339.501 90.983C345.298 90.984 351.533 90.8305 357.306 91.2127C360.713 91.4383 363.732 92.7428 366.255 95.0991C369.135 97.8071 370.816 101.553 370.925 105.505C371.06 110.062 369.382 113.514 366.352 116.781C361.184 121.234 357.245 121.182 350.715 121.092C348.116 121.056 345.366 121.083 342.755 121.079L314.453 121.076L259.052 121.082C248.6 121.086 237.589 121.289 227.181 120.999C226.543 118.116 225.645 115.204 224.953 112.304C223.572 106.608 222.554 100.829 221.906 95.0037C221.792 93.9653 221.348 91.958 221.72 91.1214Z"
+                      fill="var(--fz-text)" opacity="0.8" />
+                    <path
+                      d="M241.224 151.116C249.114 150.741 258.987 150.991 266.998 150.988L313.441 150.98L342.164 150.982C347.194 150.982 352.655 150.828 357.639 151.244C360.879 151.515 363.855 152.86 366.255 155.098C369.169 157.835 370.854 161.633 370.928 165.63C371.01 170.289 369.28 173.751 366.112 177.005C365.816 177.251 365.516 177.493 365.213 177.73C363.177 179.315 360.743 180.586 358.167 180.797C352.441 181.266 346.329 181.089 340.568 181.089L308.791 181.08L280.79 181.094C276.355 181.107 268.224 181.37 264.138 180.852C260.807 177.894 240.28 154.411 241.224 151.116Z"
+                      fill="var(--fz-text)" opacity="0.8" />
+                    <path
+                      d="M154.737 451.091C160.718 450.8 167.799 450.986 173.882 450.986L207.636 450.983C235.189 450.982 263.497 450.642 290.997 451.054L291.012 481.04C286.723 481.108 282.357 481.074 278.062 481.08L195.232 481.085L169.447 481.095C162.741 481.098 152.641 482.154 147.143 478.133C143.87 475.745 141.705 472.134 141.141 468.123C139.92 459.096 145.993 452.365 154.737 451.091Z"
+                      fill="var(--fz-accent)" opacity="0.6" />
+                    <path
+                      d="M154.735 391.091C163.595 390.74 173.937 390.983 182.881 390.985L234.142 390.986L234.142 390.986L267 390.982C271.757 390.982 280.269 390.739 284.701 391.183C286.626 397.819 288.039 403.531 289.146 410.38C289.695 413.772 289.956 417.937 290.584 421.054L277.125 421.078L195.269 421.087L169.391 421.094C162.79 421.096 152.703 422.12 147.268 418.224C143.978 415.877 141.779 412.298 141.172 408.303C139.832 399.221 145.91 392.377 154.735 391.091Z"
+                      fill="var(--fz-accent)" opacity="0.6" />
+                    <path
+                      d="M154.729 331.091C160.486 330.857 166.841 330.985 172.666 330.983L203.319 330.983L230.267 330.987C233.097 330.987 246.882 330.46 248.603 332.024C255.001 337.838 260.828 345.369 265.828 352.444C267.724 355.126 269.404 358.525 271.561 360.935C267.033 361.047 262.504 361.094 257.975 361.077L189.283 361.088L167.552 361.096C161.449 361.098 152.728 361.943 147.585 358.444C144.22 356.168 141.923 352.624 141.219 348.623C139.65 339.487 145.812 332.398 154.729 331.091Z"
+                      fill="var(--fz-accent)" opacity="0.6" />
+                  </svg></span> Target Architecture</h3>
+              <label class="input-label">Input RNA Sequence</label>
+              <textarea rows="5" placeholder="e.g., GGCGCUUGCUGGGUAAAA..."></textarea>
+            </div>
+            <div>
+              <h3 style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--fz-accent);"><svg
+                    width="28" height="28" viewBox="0 0 430 444" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="currentColor" opacity="0.15"
+                      d="M60.132 113.196C66.4717 104.47 71.2321 97.803 78.5959 89.7682C107.265 58.4121 145.717 37.7008 187.675 31.0156C219.63 25.9656 255.869 29.876 285.832 42.1C300.638 48.2272 314.634 56.1548 327.502 65.7037C365.237 93.2266 393.922 139.809 401.058 185.87C405.386 212.506 404.189 239.748 397.541 265.902C396.597 269.708 394.068 279.221 392.416 282.744C383.169 282.765 371.754 283.384 362.854 282.935C352.067 283.032 341.279 283.045 330.492 282.974C329.098 283.012 327.55 282.968 326.143 282.957C310.216 283.395 292.242 283.023 276.159 282.925L272.726 283.212C267.201 284.25 264.926 287.455 262.826 292.404C261.862 299.431 264.384 300.857 268.216 306.183C270.07 308.05 273.034 311.959 274.862 314.121L288.23 329.8L301.33 345.358C303.018 347.363 306.335 351.03 307.764 353.021C311.064 356.467 316.314 363.005 319.441 366.831C319.775 369.963 319.807 372.232 319.515 375.368C280.094 399.167 242.476 410.037 196.022 405.092C158.235 401.037 122.596 385.509 93.8978 360.596C90.7199 357.841 87.7414 355.823 84.9221 352.58C83.0185 350.391 80.261 348.753 78.772 346.013C78.3978 345.325 77.2471 344.1 76.723 343.451C71.868 340.458 66.2149 332.545 62.9041 327.852C60.6269 325.018 53.9062 315.596 53.8737 312.282C51.4849 305.954 46.5732 298.77 43.9042 292.36C43.2885 290.881 41.3836 288.529 40.9981 287.117C39.6666 282.239 38.5899 277.815 36.9463 273.002C35.0422 268.638 31.7959 258.452 31.3886 253.776C31.9311 253.082 31.9003 252.895 32.059 251.99C29.999 246.02 30.0175 234.394 29.0312 227.956C28.4601 182.998 36.3199 151.575 60.132 113.196Z" />
+                    <path fill="var(--fz-accent)"
+                      d="M213.166 132.594C218.782 129.944 219.254 129.935 225.003 132.326C229.398 135.025 233.889 137.44 238.296 140.013C241.859 142.447 251.846 146.121 252.246 150.993C253.088 161.244 252.281 171.884 252.578 182.19C252.751 188.186 238.777 194.359 234.190 196.956C231.308 198.586 228.479 200.310 225.708 202.124C225.892 209.999 225.832 217.668 225.963 225.461C230.747 228.046 235.498 230.692 240.215 233.398C243.481 235.236 251.462 238.874 252.084 242.778C253.399 251.019 252.711 260.228 252.704 268.635C252.305 276.386 253.144 277.756 246.462 282.358C242.911 284.247 239.400 286.209 235.930 288.244C230.943 291.173 224.785 295.272 219.303 296.618C217.084 295.964 214.980 295.076 212.909 294.048C209.730 292.470 206.751 290.497 203.663 288.751C200.126 286.751 188.816 281.506 187.032 278.328C185.168 275.010 185.432 246.012 186.734 242.050C187.104 240.926 187.722 240.173 188.613 239.416C191.146 237.265 194.377 235.691 197.254 234.044C202.468 231.017 207.736 228.084 213.056 225.246C212.795 217.107 212.846 209.993 212.988 201.855C210.728 200.595 208.420 199.196 206.046 197.751C199.923 193.984 191.906 190.971 187.094 185.599C185.740 184.087 185.895 176.518 185.981 174.330C186.284 166.617 185.564 158.938 186.245 151.261C186.643 146.767 193.849 144.113 197.009 141.944C202.482 138.803 207.823 135.908 213.166 132.594Z" />
+                    <path fill="var(--fz-accent)" opacity="0.9"
+                      d="M219.4 236.486C219.863 236.538 238.083 247.183 239.806 248.165C239.688 253.435 239.379 266.194 239.961 271.096C233.744 274.159 225.571 279.102 219.596 282.616C218.6 282.628 201.915 272.638 199.211 271.305C199.299 265.727 199.224 260.126 199.272 254.546C199.289 252.556 199.343 250.244 198.983 248.302Z" />
+                    <path fill="var(--fz-accent)" opacity="0.9"
+                      d="M219.236 144.45C220.415 144.489 237.225 154.551 239.753 155.815C239.704 162.847 239.524 171.814 239.851 178.754C233.067 182.491 226.394 186.506 219.591 190.191C217.589 189.531 213.162 186.883 211.205 185.748L199.258 178.792C199.322 173.224 199.471 161.644 198.992 156.226C204.704 152.222 212.971 147.923 219.236 144.45Z" />
+                    <path fill="var(--fz-accent)" opacity="0.55"
+                      d="M186.262 85.8051C186.273 78.3859 185.95 71.037 186.076 63.554C186.057 58.6477 186.117 52.0234 192.859 52.0233C200.502 52.0232 198.956 63.4119 199.032 68.2935C199.125 74.1886 198.86 79.7394 199.036 85.5037C206.074 91.1305 221.546 96.4395 225.427 102.83C225.651 108.077 226.212 128.491 225.003 132.326C219.254 129.935 218.782 129.944 213.166 132.594C212.839 131.303 212.927 125.114 212.938 123.471L212.991 108.992C208.025 105.521 198.223 100.284 192.678 97.039C185.318 100.597 171.882 110.454 164.631 112.086C158.851 110.424 156.711 103.729 161.417 100.414C169.111 94.9961 178.309 90.9224 186.262 85.8051Z" />
+                    <path fill="var(--fz-accent)" opacity="0.75"
+                      d="M134.386 180.174C139.893 177.124 140.836 176.503 147.034 178.519C150.285 180.622 153.613 182.605 157.009 184.463C161.704 187.057 169.569 190.497 173.164 194.121C174.238 195.204 174.836 196.498 175.158 197.975C176.107 202.336 175.361 207.264 175.364 211.711C175.368 217.006 175.818 222.39 175.371 227.67C175.242 229.206 175.063 231 174.215 232.323C171.15 237.101 154.164 245.132 148.223 248.612C148.679 251.305 148.555 257.099 148.515 260.081C148.466 263.695 148.602 268.224 148.413 271.765C152.452 274.05 174.41 285.143 174.939 289.473C176.026 298.368 175.024 310.799 175.374 320.041C175.499 323.166 173.838 326.197 171.161 327.665C163.718 331.748 155.53 337.268 148.066 341.036C145.699 342.201 144.227 342.803 141.708 343.576C139.357 342.722 137.974 342.074 135.756 340.985C130.237 337.261 111.845 328.807 109.426 324.461C108.735 323.219 108.456 321.86 108.32 320.463C108.016 317.324 108.368 314.066 108.345 310.906C108.304 305.166 107.291 294.261 108.795 289.028C109.209 287.59 110.745 286.332 111.894 285.442C114.889 283.123 118.486 281.333 121.768 279.439C126.302 276.822 130.807 274.09 135.43 271.636C134.826 266.396 135.199 254.183 135.254 248.381C128.664 245.181 121.881 240.42 115.328 237.002C112.747 235.372 108.837 233.301 108.626 229.843C108.071 220.701 108.139 210.502 108.35 201.416C108.461 200.952 108.529 199.484 108.586 198.909C109.028 194.415 111.696 193.423 115.248 191.18C120.667 188.462 128.894 183.342 134.386 180.174Z" />
+                    <path fill="var(--fz-accent)" opacity="0.9"
+                      d="M141.636 283.23C143.484 283.636 159.445 293.098 162.25 294.71C162.052 302.652 162.139 309.8 162.292 317.743C156.335 320.752 148.468 325.699 142.348 329.091C141.959 329.219 141.599 329.247 141.228 329.035C137.77 327.06 134.291 324.911 130.79 323.027C127.854 321.446 124.758 319.286 121.724 318.053C121.76 310.791 122.007 301.65 121.612 294.515C127.727 291.281 135.828 286.816 141.636 283.23Z" />
+                    <path fill="var(--fz-accent)" opacity="0.9"
+                      d="M141.563 190.723C143.393 191.553 146.083 193.154 147.889 194.163L162.26 202.358C161.855 209.294 162.093 218.593 162.302 225.524C155.379 229.08 148.93 233.192 142.138 236.922C141.016 236.951 124.685 227.313 121.705 225.87C121.873 220.391 122.055 207.905 121.569 202.542C126.995 199.254 137.175 194.168 141.563 190.723Z" />
+                    <path fill="var(--fz-accent)" opacity="0.75"
+                      d="M300.51 90.9341C302.851 91.5809 304.534 92.3624 306.734 93.3689C311.29 96.1496 315.991 98.6747 320.663 101.252C324.284 103.249 328.529 105.202 331.575 108.032C332.722 109.098 333.371 110.125 333.76 111.65C334.932 116.239 334.046 121.988 334.055 126.724C334.064 132.063 334.476 137.635 333.992 142.934C333.886 144.102 333.685 145.659 333.011 146.634C330.852 149.756 311.581 160.301 307.173 162.431C307.358 169.82 307.387 178.77 307.225 186.171C311.947 188.053 316.243 191.123 320.65 193.631C323.929 195.498 327.601 197.071 330.594 199.368C331.729 200.238 332.724 201.342 333.288 202.668C333.755 203.767 333.957 204.95 334.065 206.132C334.507 210.967 334.762 235.096 333.133 238.849C332.696 239.854 331.537 240.63 330.663 241.245C326.513 244.166 321.785 246.444 317.367 248.94C312.384 251.754 307.243 255.364 301.82 257.227C291.68 254.751 280.628 246.533 271.965 242.186C268.505 240.45 266.999 236.836 267.099 233.285C266.855 224.639 267.371 215.976 267.072 207.324C270.018 200.227 277.111 195.621 286.46 189.362C294.144 186.139C293.963 162.474 289.493 159.853 284.994 157.28C277.059 152.834 273.26 151.034 270.273 148.497C267.582 144.734 266.08 139.064 267.241 124.01C268.225 109.851 270.727 105.422 289.145 96.7174C294.379 93.4696 296.622 92.2995 300.51 90.9341Z" />
+                    <path fill="var(--fz-accent)" opacity="0.9"
+                      d="M300.311 104.98C301.339 104.888 318.486 115.014 320.818 116.325C320.741 121.885 320.424 134.678 320.932 139.664C314.139 143.005 307.358 147.755 300.833 150.921C300.075 151.072 283.034 141.178 280.473 139.887C280.725 132.268 280.88 124.098 280.423 116.51C286.691 113.043 294.328 108.768 300.311 104.98Z" />
+                    <path fill="var(--fz-accent)" opacity="0.9"
+                      d="M300.394 197.266C301.37 197.44 318.521 207.392 320.766 208.597C320.837 213.408 320.672 218.333 320.726 223.15C320.756 225.788 320.58 229.273 321.038 231.817C314.352 235.755 307.618 239.611 300.838 243.385C300.32 243.447 282.686 233.089 280.444 231.95C280.771 229.425 280.667 225.6 280.671 222.965C280.678 218.241 280.703 213.4 280.43 208.694C287.137 204.977 293.793 201.168 300.394 197.266Z" />
+                    <path fill="var(--fz-accent)" opacity="0.35"
+                      d="M272.472 294.289C274.704 292.324 290.537 293.073 294.528 293.067L334.58 293.093L383.88 293.029C392.912 293.04 402.085 292.977 411.114 293.251C414.021 296.282C410.909 300.548 376.662 340.176L366.045 352.593C356.192 364.183 357.043 377.833L357.039 397.432C357.043 400.447 357.095 406.536C356.485 409.478C352.33 413.252 333.658 426.631 331.958 426.827C329.861 425.192 330.506 410.99L330.384 379.274C330.379 376.945 329.76 364.765C303.244 331.544C287.658 312.814 280.219 304.976 273.601 296.851C272.472 294.289Z" />
+                  </svg></span> Chemical Library</h3>
+              <label class="input-label">Select Library Source</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="lib_src" checked /> Paste SMILES</label>
+                <label class="radio-label"><input type="radio" name="lib_src" /> Upload File (.smi, .csv, .sdf)</label>
+              </div>
+              <label class="input-label" style="margin-top: 0.75rem;">Input SMILES (one per line)</label>
+              <textarea rows="5" placeholder="CCO&#10;C1CCCCC1"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- ADMET Filters -->
+        <details>
+          <summary><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="vertical-align: middle; margin-right: 6px;">
+              <path
+                d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+              <circle cx="12" cy="12" r="3" />
+            </svg>Advanced ADMET &amp; Toxicity Filters</summary>
+          <div class="details-inner">
+            <p style="color: var(--fz-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+              Molecules passing these filters with a Binding Score ≥ 0.8 will be prioritized in the Top 100.
+            </p>
+            <div class="col-3">
+              <div>
+                <label class="input-label">Max Molecular Weight</label>
+                <div class="num-input-wrap"><input type="number" value="500" /></div>
+                <label class="input-label" style="margin-top: 0.75rem;">Max LogP</label>
+                <div class="num-input-wrap"><input type="number" value="5" /></div>
+              </div>
+              <div>
+                <label class="input-label">Max H-Bond Donors</label>
+                <div class="num-input-wrap"><input type="number" value="5" /></div>
+                <label class="input-label" style="margin-top: 0.75rem;">Max H-Bond Acceptors</label>
+                <div class="num-input-wrap"><input type="number" value="10" /></div>
+              </div>
+              <div>
+                <label class="input-label">Max TPSA</label>
+                <div class="num-input-wrap"><input type="number" value="140" /></div>
+                <label class="input-label" style="margin-top: 0.75rem; display: flex; align-items: center; gap: 8px;">
+                  <input type="checkbox" checked style="accent-color: var(--fz-accent);" /> Filter known Toxicophores
+                </label>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <hr class="section-divider" />
+        <button class="btn" onclick="showResults()">Initialize Foundational Screening</button>
+
+        <div id="screening-results" style="display:none; margin-top: 2rem;">
+          <div class="alert success"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              style="vertical-align: middle; margin-right: 8px;">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <path d="m9 11 3 3L22 4" />
+            </svg> Screening Complete!</div>
+
+          <h2 style="margin-top: 1.5rem; display: flex; align-items: center; gap: 10px;"><span
+              style="color: var(--fz-accent);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="1.5">
+                <path d="M3 3h18v18H3zM3 9h18M3 15h18M9 3v18M15 3v18" />
+                <path d="M9 9l6 6M15 9l-6 6" stroke-width="2" stroke="var(--fz-accent)" />
+              </svg></span> Top Binding Candidates</h2>
+          <div class="metrics-grid">
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55a1 1 0 0 0 .9 1.45h12.76a1 1 0 0 0 .9-1.45l-5.069-10.127A2 2 0 0 1 14 9.527V2" />
+                  <path d="M8.5 2h7" />
+                  <path d="M7 16.5h10" />
+                </svg></div>
+              <div class="metric-value">12</div>
+              <div class="metric-label">Ligands Screened</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
+                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
+                  <path d="M4 22h16" />
+                  <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
+                  <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
+                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
+                </svg></div>
+              <div class="metric-value">0.94</div>
+              <div class="metric-label">Highest Score</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg></div>
+              <div class="metric-value">~1.5s</div>
+              <div class="metric-label">Computation</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <path d="m9 11 3 3L22 4" />
+                </svg></div>
+              <div class="metric-value">7</div>
+              <div class="metric-label">ADMET Passed</div>
+            </div>
+          </div>
+
+          <div class="results-table-wrap" style="margin-top: 1.5rem;">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th>Rank</th>
+                  <th>2D Structure</th>
+                  <th>SMILES</th>
+                  <th>Binding Score</th>
+                  <th>ADMET Properties</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><span class="rank-badge">1</span></td>
+                  <td>
+                    <div class="mol-thumb">Mol Preview</div>
+                  </td>
+                  <td class="smiles-cell">CC(C)(C)c1ccc2occ(CC(=O)Nc3ccccc3F)c2c1</td>
+                  <td class="score-cell">0.9413</td>
+                  <td class="admet-cell"><span class="admet-label">MW</span> 353.4<br><span
+                      class="admet-label">LogP</span> 4.12<br><span class="admet-label">HBD/HBA</span> 1/4<br><span
+                      class="admet-label">TPSA</span> 58.2</td>
+                </tr>
+                <tr>
+                  <td><span class="rank-badge">2</span></td>
+                  <td>
+                    <div class="mol-thumb">Mol Preview</div>
+                  </td>
+                  <td class="smiles-cell">Cc1ccc(-c2cc(=O)oc3cc(OCC(=O)O)ccc23)cc1</td>
+                  <td class="score-cell">0.8871</td>
+                  <td class="admet-cell"><span class="admet-label">MW</span> 338.3<br><span
+                      class="admet-label">LogP</span> 3.45<br><span class="admet-label">HBD/HBA</span> 1/6<br><span
+                      class="admet-label">TPSA</span> 79.1</td>
+                </tr>
+                <tr>
+                  <td><span class="rank-badge">3</span></td>
+                  <td>
+                    <div class="mol-thumb">Mol Preview</div>
+                  </td>
+                  <td class="smiles-cell">O=C(O)c1ccc(NC(=O)c2ccc(Cl)cc2)cc1</td>
+                  <td class="score-cell">0.8302</td>
+                  <td class="admet-cell"><span class="admet-label">MW</span> 275.7<br><span
+                      class="admet-label">LogP</span> 2.87<br><span class="admet-label">HBD/HBA</span> 2/4<br><span
+                      class="admet-label">TPSA</span> 66.4</td>
+                </tr>
+                <tr>
+                  <td><span class="rank-badge">4</span></td>
+                  <td>
+                    <div class="mol-thumb">Mol Preview</div>
+                  </td>
+                  <td class="smiles-cell">CCO</td>
+                  <td class="score-cell">0.8012</td>
+                  <td class="admet-cell"><span class="admet-label">MW</span> 46.1<br><span
+                      class="admet-label">LogP</span> -0.14<br><span class="admet-label">HBD/HBA</span> 1/1<br><span
+                      class="admet-label">TPSA</span> 20.2</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <hr class="section-divider" />
+          <h2 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--fz-accent);"><svg
+                width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                <polyline points="16 7 22 7 22 13" />
+              </svg></span> Screening Statistics</h2>
+          <div class="metrics-grid" style="margin-bottom: 1.5rem;">
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <rect x="7" y="13" width="3" height="5" />
+                  <rect x="14" y="8" width="3" height="10" />
+                </svg></div>
+              <div class="metric-value">0.7841</div>
+              <div class="metric-label">Mean Score</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 3v16a2 2 0 0 0 2 2h16" />
+                  <rect x="7" y="13" width="3" height="5" />
+                  <rect x="14" y="8" width="3" height="10" />
+                </svg></div>
+              <div class="metric-value">0.8102</div>
+              <div class="metric-label">Median Score</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="22 17 13.5 8.5 8.5 13.5 2 7" />
+                  <polyline points="16 17 22 17 22 11" />
+                </svg></div>
+              <div class="metric-value">0.5213</div>
+              <div class="metric-label">Min Score</div>
+            </div>
+            <div class="metric-card">
+              <div class="metric-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"
+                  stroke="var(--fz-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg></div>
+              <div class="metric-value">0.9413</div>
+              <div class="metric-label">Max Score</div>
+            </div>
+          </div>
+
+          <hr class="section-divider" />
+          <h2 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--fz-accent);"><svg
+                width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg></span> Export Results</h2>
+          <div class="col-2" style="margin-top: 1rem;">
+            <button class="btn btn-secondary">Download ALL Results (.csv)</button>
+            <button class="btn btn-secondary">Download Filtered TOP 7 (.csv)</button>
+          </div>
+        </div>
+
+        <div class="fazena-footer">Developed by <a href="https://www.fazena.org" target="_blank">FAZENA</a></div>
+      </div>
+
+      <!-- ══════════════ PAGE: BINDING SITE PREDICTION ══════════════ -->
+      <div id="page-binding" class="page fade-in">
+        <h1>Binding Site Prediction</h1>
+        <p class="subtitle">Predict per-residue binding probabilities for a specific RNA and ligand pair.</p>
+
+        <div class="fazena-card">
+          <div class="col-2">
+            <div>
+              <h3 style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--fz-accent);"><svg
+                    width="18" height="18" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M150.815 0L160.901 0C163.181 0.913013 165.648 1.1956 167.927 2.05723C176.627 5.3469 183.973 11.9088 187.816 20.4291C189.266 23.6033 190.218 26.9817 190.64 30.4456C191.333 35.9937 190.903 42.4391 191.01 48.0944C191.254 60.969 190.609 74.692 191.188 87.4759C192.454 112.813 199.326 137.553 211.308 159.913C224.218 184.108 242.749 204.85 265.343 220.392C275.329 227.236 284.55 232.164 294.558 239.707C351.742 282.685 386.923 348.809 390.612 420.248C391.293 432.191 391.007 445.089 391.016 457.143C391.021 463.433 391.35 474.232 390.785 480.139C390.509 483.358 389.782 486.522 388.625 489.538C385.312 498.136 378.697 505.135 370.265 508.951C368.183 509.893 362.052 511.475 361.189 512L351.099 512C349.619 511.283 347.389 510.957 345.78 510.476C335.105 507.335 325.843 498.304 322.616 487.606C320.144 479.409 321.155 469.254 321.01 460.653C320.831 450.072 321.177 439.414 320.957 428.82C320.583 414.857 318.523 400.992 314.82 387.524C304.443 349.851 281.548 316.833 249.903 293.907C243.32 289.15 236.658 285.361 229.889 280.975C222.927 276.462 216.212 271.577 209.774 266.343C177.896 240.396 153.227 206.688 138.137 168.455C128.405 143.821 122.728 117.774 121.326 91.3243C120.469 74.5769 121.473 57.8148 120.991 40.922C120.502 23.7554 125.88 9.87253 142.714 2.58691C145.25 1.48965 148.096 1.08011 150.622 0.0787148L150.815 0Z"
+                      fill="var(--fz-accent)" />
+                    <path
+                      d="M221.111 31.0136L312.021 30.9886L341.696 30.9785C349.101 30.9769 359.908 29.6548 365.757 34.6551C368.835 37.2954 370.697 41.0807 370.91 45.13C371.149 49.6923 369.587 53.1805 366.613 56.5187C364.759 58.3778 361.563 60.3503 358.981 60.6721C353.891 61.3067 348.097 61.0929 342.935 61.0904L316.26 61.0755L220.973 61.0834C221.293 51.5109 220.527 40.3575 221.111 31.0136Z"
+                      fill="var(--fz-text)" opacity="0.8" />
+                    <path
+                      d="M221.72 91.1214C221.936 91.1056 222.152 91.0922 222.368 91.0812C231.114 90.6785 242.219 90.9882 251.088 90.9862L305.673 90.9804L339.501 90.983C345.298 90.984 351.533 90.8305 357.306 91.2127C360.713 91.4383 363.732 92.7428 366.255 95.0991C369.135 97.8071 370.816 101.553 370.925 105.505C371.06 110.062 369.382 113.514 366.352 116.781C361.184 121.234 357.245 121.182 350.715 121.092C348.116 121.056 345.366 121.083 342.755 121.079L314.453 121.076L259.052 121.082C248.6 121.086 237.589 121.289 227.181 120.999C226.543 118.116 225.645 115.204 224.953 112.304C223.572 106.608 222.554 100.829 221.906 95.0037C221.792 93.9653 221.348 91.958 221.72 91.1214Z"
+                      fill="var(--fz-text)" opacity="0.8" />
+                    <path
+                      d="M241.224 151.116C249.114 150.741 258.987 150.991 266.998 150.988L313.441 150.98L342.164 150.982C347.194 150.982 352.655 150.828 357.639 151.244C360.879 151.515 363.855 152.86 366.255 155.098C369.169 157.835 370.854 161.633 370.928 165.63C371.01 170.289 369.28 173.751 366.112 177.005C365.816 177.251 365.516 177.493 365.213 177.73C363.177 179.315 360.743 180.586 358.167 180.797C352.441 181.266 346.329 181.089 340.568 181.089L308.791 181.08L280.79 181.094C276.355 181.107 268.224 181.37 264.138 180.852C260.807 177.894 240.28 154.411 241.224 151.116Z"
+                      fill="var(--fz-text)" opacity="0.8" />
+                    <path
+                      d="M154.737 451.091C160.718 450.8 167.799 450.986 173.882 450.986L207.636 450.983C235.189 450.982 263.497 450.642 290.997 451.054L291.012 481.04C286.723 481.108 282.357 481.074 278.062 481.08L195.232 481.085L169.447 481.095C162.741 481.098 152.641 482.154 147.143 478.133C143.87 475.745 141.705 472.134 141.141 468.123C139.92 459.096 145.993 452.365 154.737 451.091Z"
+                      fill="var(--fz-accent)" opacity="0.6" />
+                    <path
+                      d="M154.735 391.091C163.595 390.74 173.937 390.983 182.881 390.985L234.142 390.986L234.142 390.986L267 390.982C271.757 390.982 280.269 390.739 284.701 391.183C286.626 397.819 288.039 403.531 289.146 410.38C289.695 413.772 289.956 417.937 290.584 421.054L277.125 421.078L195.269 421.087L169.391 421.094C162.79 421.096 152.703 422.12 147.268 418.224C143.978 415.877 141.779 412.298 141.172 408.303C139.832 399.221 145.91 392.377 154.735 391.091Z"
+                      fill="var(--fz-accent)" opacity="0.6" />
+                    <path
+                      d="M154.729 331.091C160.486 330.857 166.841 330.985 172.666 330.983L203.319 330.983L230.267 330.987C233.097 330.987 246.882 330.46 248.603 332.024C255.001 337.838 260.828 345.369 265.828 352.444C267.724 355.126 269.404 358.525 271.561 360.935C267.033 361.047 262.504 361.094 257.975 361.077L189.283 361.088L167.552 361.096C161.449 361.098 152.728 361.943 147.585 358.444C144.22 356.168 141.923 352.624 141.219 348.623C139.65 339.487 145.812 332.398 154.729 331.091Z"
+                      fill="var(--fz-accent)" opacity="0.6" />
+                  </svg></span> Target Architecture</h3>
+              <label class="input-label">RNA Sequence</label>
+              <textarea rows="4" placeholder="Enter your RNA sequence here..."
+                id="rna-input">GGCGCUUGCUGGGUAAAACCGUAACUGGAGCGGCUAUGGGCGUAA</textarea>
+            </div>
+            <div>
+              <h3 style="display: flex; align-items: center; gap: 8px;"><span style="color: var(--fz-accent);"><svg
+                    width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="9" stroke-dasharray="2 2" />
+                    <path d="M12 2v20M2 12h20" />
+                    <circle cx="12" cy="12" r="3" fill="var(--fz-accent)" />
+                    <path d="M16 16l4 4M8 8L4 4" stroke-width="2" />
+                  </svg></span> Ligand Probe</h3>
+              <label class="input-label">Ligand Input Type</label>
+              <div class="radio-group">
+                <label class="radio-label"><input type="radio" name="lig_src" checked /> Paste SMILES</label>
+                <label class="radio-label"><input type="radio" name="lig_src" /> Upload SDF</label>
+              </div>
+              <label class="input-label" style="margin-top: 0.75rem;">Ligand SMILES</label>
+              <input class="input" type="text" value="CC(C)(C)c1ccc2occ(CC(=O)Nc3ccccc3F)c2c1" />
+
+              <p
+                style="color: var(--fz-text-muted); font-size: 0.82rem; text-transform: uppercase; letter-spacing: 1px; margin-top: 1rem;">
+                Ligand 2D Structure
+              </p>
+              <div
+                style="background: var(--fz-bg-primary); border: 1px solid var(--fz-border); border-radius: var(--fz-radius-card); padding: 1rem; text-align: center; min-height: 120px; display: flex; align-items: center; justify-content: center; color: var(--fz-text-dim); font-size: 0.85rem;">
+                2D Structure Preview (RDKit)
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn" onclick="showBindingResults()">Generate Binding Map</button>
+
+        <div id="binding-results" style="display:none; margin-top: 2rem;">
+          <div class="alert success"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              style="vertical-align: middle; margin-right: 8px;">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <path d="m9 11 3 3L22 4" />
+            </svg> Prediction Complete!</div>
+
+          <hr class="section-divider" />
+          <h2 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--fz-accent);"><svg
+                width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6zM9 3v18M15 6v15" />
+              </svg></span> Interaction Probability Heatmap</h2>
+          <p style="color: var(--fz-text-muted); font-size: 0.9rem; margin-bottom: 0.75rem;">
+            Residues with high probabilities are highlighted. Hover over characters to see exact scores.
+          </p>
+
+          <div class="rna-sequence-container" id="heatmap-output"></div>
+
+          <div class="heatmap-legend">
+            <span>Low probability</span>
+            <div class="legend-bar"></div>
+            <span>High probability</span>
+          </div>
+
+          <hr class="section-divider" />
+          <h2 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--fz-accent);"><svg
+                width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 3v18" />
+                <rect width="18" height="18" x="3" y="3" rx="2" />
+                <path d="M3 9h18" />
+                <path d="M3 15h18" />
+              </svg></span> Tabular Results (Sample)</h2>
+          <div class="results-table-wrap" style="max-height: 240px;">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th>Position</th>
+                  <th>Nucleotide</th>
+                  <th>Probability</th>
+                </tr>
+              </thead>
+              <tbody id="binding-table"></tbody>
+            </table>
+          </div>
+
+          <hr class="section-divider" />
+          <h2 style="display: flex; align-items: center; gap: 10px;"><span style="color: var(--fz-accent);"><svg
+                width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg></span> Export High-Probability Sites</h2>
+          <p style="color: var(--fz-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
+            Download a <code style="color: var(--fz-accent); font-family: var(--fz-font-mono);">.csv</code> containing
+            only the residues with a binding probability > 0.6.
+          </p>
+          <button class="btn btn-secondary" style="max-width: 320px;">Download 11 Sites (.csv)</button>
+        </div>
+
+        <div class="fazena-footer">Developed by <a href="https://www.fazena.org" target="_blank">FAZENA</a></div>
+      </div>
+
+    </main>
+  </div>
+
+  <script>
+    // ── Page navigation ──
+    function showPage(id, btn) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      const page = document.getElementById('page-' + id);
+      page.classList.add('active');
+      // Re-trigger fade-in
+      page.classList.remove('fade-in');
+      void page.offsetWidth;
+      page.classList.add('fade-in');
+      btn.classList.add('active');
+      // reset screening results
+      const sr = document.getElementById('screening-results');
+      if (sr) sr.style.display = 'none';
+      const br = document.getElementById('binding-results');
+      if (br) br.style.display = 'none';
+    }
+
+    // ── Show screening results ──
+    function showResults() {
+      const el = document.getElementById('screening-results');
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    // ── Show binding results with heatmap ──
+    function showBindingResults() {
+      document.getElementById('binding-results').style.display = 'block';
+      const rna = document.getElementById('rna-input').value || 'GGCGCUUGCUGGGUAAAACCGUAACUGG';
+
+      // Generate mock probabilities
+      const probs = rna.split('').map((_, i) => {
+        const hotspots = [5, 12, 22, 30, 38];
+        let p = Math.random() * 0.3;
+        hotspots.forEach(h => {
+          const d = Math.abs(i - h);
+          if (d < 5) p = Math.min(1, p + (1 - d / 5) * 0.85);
+        });
+        return Math.min(1, p);
+      });
+
+      // Heatmap
+      const heatmap = rna.split('').map((ch, i) => {
+        const p = probs[i];
+        const alpha = Math.max(0.05, p);
+        const fw = p > 0.5 ? 'bold' : 'normal';
+        const col = p > 0.3 ? '#fff' : 'rgba(255,255,255,0.5)';
+        return `<span class="rna-char" title="${ch}: ${p.toFixed(3)}" style="background:rgba(234,116,20,${alpha.toFixed(2)});color:${col};font-weight:${fw}">${ch}</span>`;
+      }).join('');
+      document.getElementById('heatmap-output').innerHTML = heatmap;
+
+      // Table
+      const tbody = document.getElementById('binding-table');
+      tbody.innerHTML = rna.split('').slice(0, 15).map((ch, i) => {
+        const p = probs[i];
+        const colStyle = `color:${p > 0.6 ? 'var(--fz-accent)' : 'var(--fz-text-muted)'}`;
+        const bg = i % 2 === 0 ? '' : 'style="background:var(--fz-bg-secondary)"';
+        return `<tr ${bg}><td>${i + 1}</td><td style="font-family:var(--fz-font-mono)">${ch}</td><td style="${colStyle};font-family:var(--fz-font-mono)">${p.toFixed(3)}</td></tr>`;
+      }).join('');
+
+      document.getElementById('binding-results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  </script>
+</body>
+
+</html>

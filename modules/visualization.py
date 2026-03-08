@@ -7,20 +7,23 @@ from io import BytesIO
 def render_ligand_2d(smiles: str):
     """
     Renders a 2D image of a ligand given its SMILES string within a Streamlit app.
-    Provides fallback to text if RDKit fails or SMILES is invalid.
+    Styled to match the Fazena dark design language.
     """
     try:
         mol = Chem.MolFromSmiles(smiles)
         if mol:
-            # Generate image in memory
             img = Draw.MolToImage(mol, size=(300, 300))
             buffered = BytesIO()
             img.save(buffered, format="PNG")
             img_str = base64.b64encode(buffered.getvalue()).decode()
             
-            # Display image centered
             st.markdown(
-                f"<div style='text-align: center;'><img src='data:image/png;base64,{img_str}' style='border-radius: 8px;'/></div>",
+                f"<div style='text-align: center; background: var(--fz-bg-primary); "
+                f"border: 1px solid var(--fz-border); border-radius: var(--fz-radius-card); "
+                f"padding: 1rem; display: inline-block;'>"
+                f"<img src='data:image/png;base64,{img_str}' "
+                f"style='border-radius: 8px; max-width: 280px;'/>"
+                f"</div>",
                 unsafe_allow_html=True
             )
         else:
@@ -31,27 +34,37 @@ def render_ligand_2d(smiles: str):
 def highlight_rna_sequence(sequence: str, probabilities: list) -> str:
     """
     Takes an RNA sequence and a list of probabilities (0.0 to 1.0) of the same length.
-    Returns an HTML string where each nucleotide is wrapped in a span with a background
-    color indicating its binding probability. Let's use a heatmap from transparent to deep accent (cyan).
+    Returns an HTML string with each nucleotide highlighted using the Fazena orange accent.
+    High probability → strong orange. Low probability → subtle.
     """
     if len(sequence) != len(probabilities):
-        return f"Error: Sequence length ({len(sequence)}) does not match probabilities length ({len(probabilities)})."
+        return (
+            f"Error: Sequence length ({len(sequence)}) does not match "
+            f"probabilities length ({len(probabilities)})."
+        )
     
     html_output = ""
     for char, prob in zip(sequence, probabilities):
-        # Calculate RGBA color based on probability. Let's use a green/cyan hue: rgba(0, 242, 254, alpha)
-        # Ensure minimum visibility
+        # Use orange accent color with varying alpha based on probability
         alpha = max(0.05, prob)
         
-        # Tooltip for exact score
         tooltip = f"{char}: {prob:.3f}"
         
-        # Style
-        # Bolder text for scores > 0.5
+        # Bolder text for high-probability residues
         font_weight = "bold" if prob > 0.5 else "normal"
-        color = "#ffffff" if prob > 0.3 else "#a0aabf"
+        # Brighter text for higher scores
+        color = "#ffffff" if prob > 0.3 else "rgba(255, 255, 255, 0.5)"
         
-        span = f"<span title='{tooltip}' style='background-color: rgba(0, 242, 254, {alpha}); color: {color}; font-weight: {font_weight}; padding: 2px 1px; border-radius: 2px; transition: background-color 0.2s;'>{char}</span>"
+        # Use orange-based background matching the accent
+        bg_color = f"rgba(218, 117, 45, {alpha})"
+        
+        span = (
+            f"<span title='{tooltip}' style='"
+            f"background-color: {bg_color}; color: {color}; "
+            f"font-weight: {font_weight}; padding: 2px 1px; "
+            f"border-radius: 2px; transition: background-color 0.2s;'>"
+            f"{char}</span>"
+        )
         html_output += span
         
     return html_output
