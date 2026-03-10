@@ -2,7 +2,7 @@ import streamlit as st
 import time
 import pandas as pd
 from rdkit import Chem
-from .smartbind_wrapper import run_binding_site_prediction
+from .smartbind_wrapper import run_binding_site_prediction, is_engine_active
 from .visualization import highlight_rna_sequence, render_ligand_2d
 from .ui_components import render_header, render_section_divider, render_footer, render_success_alert
 
@@ -22,7 +22,9 @@ ICON_TABLE = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke
 ICON_EXPORT = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>'
 
 def render_page():
-    render_header("Binding Site Prediction", "Map atomic-scale interaction probabilities across RNA sequences using cross-modal inference.")
+    render_header("RNA Hunter | Binding Site Search", "Map atomic-scale interaction probabilities across RNA sequences using cross-modal inference.")
+    
+    # Removed engine status as per user request
     
     st.markdown("<div class='fazena-card'>", unsafe_allow_html=True)
     col1, col2 = st.columns(2)
@@ -43,7 +45,7 @@ def render_page():
             render_ligand_2d(ligand_smiles)
     st.markdown("</div>", unsafe_allow_html=True)
 
-    if st.button("Generate Binding Map", use_container_width=True):
+    if st.button("Generate Binding Map", width="stretch"):
         if not rna_seq or not ligand_smiles:
             st.error("Please provide both RNA Sequence and Ligand Probe."); return
         with st.spinner("Decoding Interaction interfaces..."):
@@ -57,12 +59,12 @@ def render_page():
             render_section_divider()
             st.markdown(f"<h3 style='display: flex; align-items: center; gap: 10px;'><span style='color: var(--fz-accent);'>{ICON_TABLE}</span> Quantized Probabilities</h3>", unsafe_allow_html=True)
             df_results = pd.DataFrame({"Position": range(1, len(rna_seq) + 1), "Nucleotide": list(rna_seq), "Probability": probabilities})
-            st.dataframe(df_results.style.background_gradient(cmap='YlOrRd', subset=['Probability']), use_container_width=True, height=300)
+            st.dataframe(df_results.style.background_gradient(cmap='YlOrRd', subset=['Probability']), width="stretch", height=300)
 
             render_section_divider()
             st.markdown(f"<h3 style='display: flex; align-items: center; gap: 10px;'><span style='color: var(--fz-accent);'>{ICON_EXPORT}</span> Export Analytics</h3>", unsafe_allow_html=True)
             df_filtered = df_results[df_results['Probability'] > 0.6]
             if not df_filtered.empty:
-                st.download_button(f"Download {len(df_filtered)} Hotspots (.csv)", df_filtered.to_csv(index=False).encode('utf-8'), "hotspots.csv", "text/csv", use_container_width=True)
+                st.download_button(f"Download {len(df_filtered)} Hotspots (.csv)", df_filtered.to_csv(index=False).encode('utf-8'), "hotspots.csv", "text/csv", width="stretch")
             else: st.info("No binding hotspots detected above 0.6 threshold.")
     render_footer()
