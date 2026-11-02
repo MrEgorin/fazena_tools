@@ -1,0 +1,21 @@
+/* Custom CSS for Fazena Blue-Green Design */
+body {
+    background-color: #1E3A8A; /* Deep blue background */
+    color: #E9F0DA; /* Mint-green text */
+    font-family: 'Arial', sans-serif;
+}
+
+h1, h2, h3 {
+    color: #66FCF1; /* Crisp emerald accent */
+}
+
+.card {
+    background-color: #45A29E; /* Darker blue card background */
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.sidebar .sidebar-content {
+    background-color: #1E3A8A; /* Deep blue sidebar */
+}
