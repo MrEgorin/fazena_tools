@@ -10,3 +10,6 @@ stmol
 scikit-learn
 scipy
 networkx
+torch
+matplotlib
+subprocess

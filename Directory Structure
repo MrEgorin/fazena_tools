@@ -1,0 +1,24 @@
+fazena_tools/
+├── app/
+│   └── app.py
+├── modules/
+│   ├── admet_filter/
+│   │   ├── __init__.py
+│   │   └── filter_admet.py
+│   ├── docking/
+│   │   ├── __init__.py
+│   │   └── auto_docking.py
+│   ├── prozena/
+│   │   ├── __init__.py
+│   │   └── protein_screening.py
+│   ├── rna_hunter/
+│   │   ├── __init__.py
+│   │   └── rna_binding_prediction.py
+│   ├── refazenation/
+│   │   ├── __init__.py
+│   │   └── drug_repurposing.py
+│   └── visualization/
+│       ├── __init__.py
+│       └── interaction_plots.py
+├── requirements.txt
+└── README.md
