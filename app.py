@@ -67,7 +67,7 @@ def main():
             st.header("Drug Repurposing and Fast Target Prediction")
             smiles = st.text_input("Enter SMILES", value="CCO")
             if st.button("Run Drug Repurposing"):
-                drug_repurposer = DrugRepurposer()
+                drug_repurposer = DrugRepurposing()  # Corrected class name
                 results = drug_repurposer.predict(smiles)
                 st.write(f"Prediction Results: {results}")
 
