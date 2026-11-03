@@ -25,6 +25,7 @@
 - [Input Formats and Compatibility](#input-formats-and-compatibility)
 - [Automated Test Suite](#automated-test-suite)
 - [Authors and Citation](#authors-and-citation)
+- [AI-Assisted Engineering & Code Automation](#ai-assisted-engineering--code-automation)
 
 ---
 
@@ -244,7 +245,8 @@ OK
 
 ## Authors and Citation
 
-Developed by **Yehor Franchuk, MrEgorin, and the FAZENA Team**.  
+Developed by **Yehor Franchuk ([@MrEgorin](https://github.com/MrEgorin)) and the FAZENA Team**.  
+- **Lead Developer:** Yehor Franchuk ([@MrEgorin](https://github.com/MrEgorin))  
 - **Affiliation:** Institute of Cell Biology, National Academy of Sciences of Ukraine ([cellbiol.lviv.ua](http://cellbiol.lviv.ua))  
 - **Official Website:** [https://fazena.org](https://fazena.org)  
 
@@ -252,9 +254,19 @@ If you use FAZENA Tools in your academic or industrial research, please cite:
 
 ```bibtex
 @software{fazena_tools_2026,
-  author = {Yehor Franchuk and MrEgorin},
+  author = {Yehor Franchuk (@MrEgorin)},
   title = {FAZENA Tools: Modular Bio-Computational Drug Discovery Platform},
   year = {2026},
   url = {https://github.com/MrEgorin/fazena_tools}
 }
 ```
+
+---
+
+## AI-Assisted Engineering & Code Automation
+
+The codebase development, pipeline automation, algorithmic optimization, and test suites for FAZENA Tools were engineered with the assistance of advanced Large Language Models:
+
+- **Claude Opus 4.6** — High-level architecture design, workflow planning, and algorithmic debugging.
+- **Gemini 3.8 Flash (High)** — Full-stack code synthesis, multi-module integration, test automation, and UI polishing.
+- **Qwen 2.5 / 2.6 Coder (Local LLM)** — Local offline code generation, command-line automation, and syntax refactoring.

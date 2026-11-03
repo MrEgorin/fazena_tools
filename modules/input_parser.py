@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Flexible Multi-Format Input & Output Parser
 Handles multi-line SMILES, SDF, CSV, TSV, FASTA, PDB, and PDBQT with auto-detection.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import List, Tuple, Dict, Any, Optional

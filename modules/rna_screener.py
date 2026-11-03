@@ -2,7 +2,7 @@
 FAZENA Tools — Lightweight RNA-Ligand Screening & Binding Site Engine
 Physicochemical and sequence-based machine learning for fast RNA virtual screening.
 Evaluates aromatic intercalation, electrostatic backbone interactions, and groove hydrogen bonding.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import List, Dict, Any, Tuple, Optional

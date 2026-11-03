@@ -2,7 +2,7 @@
 FAZENA Tools — High-Coverage Target Prediction & Proteome Navigation Engine
 Lightweight target prediction using 2D Morgan fingerprints and curated bioactive target chemotypes.
 Fast, offline, zero-cloud inference covering human and pathogen proteomes (Kinome, GPCRome, Proteases, Ion Channels, Nuclear Receptors, Transporters, Epigenome).
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

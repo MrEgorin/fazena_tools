@@ -2,7 +2,7 @@
 FAZENA Tools — ConPLex Fast Protein-Ligand Screening Engine
 Implements the ConPLex co-embedding neural network architecture for high-throughput screening.
 Uses pre-trained ConPLex BindingDB model checkpoint for sub-second library screening.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import List, Dict, Any, Tuple, Optional

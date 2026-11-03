@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Unified AutoDock Vina Docking & Interaction Engine
 Pure Python receptor and ligand preparation with AutoDock Vina and ProLIF.
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

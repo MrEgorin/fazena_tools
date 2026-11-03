@@ -1,7 +1,7 @@
 """
 FAZENA Tools — AutoDocking Class Wrapper
 Wraps the real AutoDock Vina engine in modules/docking_engine.py
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

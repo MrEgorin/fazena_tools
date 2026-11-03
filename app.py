@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Modular Drug Discovery Platform
 Unified Streamlit Application for RNA Hunter, Prozena, and Refazenation.
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

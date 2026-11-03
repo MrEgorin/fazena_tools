@@ -9,7 +9,7 @@ Li, Y.; Shi, Q.; Lu, X.; Yang, D.; Yeerken, D.; Jin, H.; Sun, Q.
 ComTarget: Small-Molecule Target Prediction with Combinatorial Modeling.
 Pharmaceuticals 2026, 19, 715. https://doi.org/10.3390/ph19050715
 
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

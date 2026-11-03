@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Refazenation Wrapper
 Wraps real AutoDock Vina docking and Target Prediction engines.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import List, Dict, Any, Optional

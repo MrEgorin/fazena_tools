@@ -1,6 +1,6 @@
 """
 FAZENA Tools — App Entrypoint Redirect
-Author: Yehor Franchuk MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 import sys

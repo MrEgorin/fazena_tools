@@ -2,7 +2,7 @@
 FAZENA Tools — Core Platform Test Suite
 Verifies module imports, compatibility classes, deep learning co-embeddings,
 AutoDock Vina RNA/protein docking, flexible parameters, and 2D/3D visualizations.
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

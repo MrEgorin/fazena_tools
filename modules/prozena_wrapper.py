@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Prozena Protein Screening Wrapper
 Connects Prozena to ConPLex neural network engine and BIND.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import List, Dict, Any, Tuple

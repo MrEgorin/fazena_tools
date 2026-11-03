@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Prozena Module Package
 Protein-targeted screening using ConPLex contrastive co-embedding with automated AutoDock Vina docking.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from .protein_screening import ProteinScreening

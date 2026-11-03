@@ -3,7 +3,7 @@ FAZENA Tools — Molecular & Interaction Visualization Utilities
 Provides 2D molecule rendering, 2D protein/RNA-ligand interaction diagrams,
 interactive 3D py3Dmol macromolecule & complex viewer with search box preview,
 and InteractionPlots compatibility class.
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

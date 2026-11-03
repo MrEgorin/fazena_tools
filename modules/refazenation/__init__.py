@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Refazenation Module Package
 Fast Target Prediction (SwissTargetPrediction alternative) and automated AutoDock Vina reverse docking.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from .drug_repurposing import DrugRepurposing

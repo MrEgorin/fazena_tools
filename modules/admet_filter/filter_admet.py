@@ -1,7 +1,7 @@
 """
 FAZENA Tools — ADMEFilter Compatibility Wrapper
 Wraps the consolidated ADMET engine in modules/admet.py
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import Dict, Any, List

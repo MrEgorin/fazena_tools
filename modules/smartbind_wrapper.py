@@ -1,7 +1,7 @@
 """
 FAZENA Tools — SMARTBind & RNA Hunter Wrapper
 Connects RNA Hunter virtual screening and binding site prediction to real inference engines.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 import pandas as pd

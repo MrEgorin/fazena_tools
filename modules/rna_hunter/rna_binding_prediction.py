@@ -1,7 +1,7 @@
 """
 FAZENA Tools — RNAHunter Compatibility Class
 Wraps RNA screening & binding site engine in modules/rna_screener.py
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import Dict, List, Optional

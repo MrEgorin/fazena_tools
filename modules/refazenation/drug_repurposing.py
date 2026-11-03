@@ -3,7 +3,7 @@ FAZENA Tools — DrugRepurposing Compatibility & Programmatic API
 Provides high-level biological target prediction and drug repurposing pipelines
 supporting both Curated Bioactive Panels and ComTarget 26,000+ Proteome Combinatorial Modeling.
 
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

@@ -10,7 +10,7 @@ References:
 2. Trott & Olson. AutoDock Vina: Improving the speed and accuracy of docking.
    J. Comput. Chem. 2010, 31, 455-461.
 
-Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
 Affiliation: Institute of Cell Biology NASU
 """
 

@@ -3,7 +3,7 @@
  * High-performance C implementation of 3D Hu Moments, Surface, Volume, and Shape Invariants.
  * Reference: Li et al. ComTarget: Small-Molecule Target Prediction with Combinatorial Modeling.
  *            Pharmaceuticals 2026, 19, 715.
- * Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+ * Author: Yehor Franchuk (@MrEgorin), FAZENA (fazena.org)
  * Affiliation: Institute of Cell Biology NASU
  */
 

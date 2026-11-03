@@ -1,7 +1,7 @@
 """
 FAZENA Tools — System Configuration & Environment Discovery
 Handles cross-platform paths, GPU acceleration, and engine discovery.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 import os

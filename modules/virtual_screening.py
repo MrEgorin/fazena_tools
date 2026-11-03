@@ -1,7 +1,7 @@
 """
 FAZENA Tools — RNA Hunter Virtual Screening
 Foundry-scale virtual screening against RNA architectures with automated AutoDock Vina docking.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 import streamlit as st

@@ -1,7 +1,7 @@
 """
 FAZENA Tools — Prozena Protein Screening & GPU Docking
 High-throughput protein-ligand screening using ConPLex neural network with AutoDock Vina GPU docking.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 import streamlit as st

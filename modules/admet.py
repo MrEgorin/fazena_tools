@@ -2,7 +2,7 @@
 FAZENA Tools — Consolidated ADMET and Safety Filtering Engine
 Provides Lipinski Rule of 5, Veber parameters, RDKit PAINS and Brenk catalogs,
 and toxicophore/reactive functional group screening.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import Dict, List, Tuple, Any, Optional

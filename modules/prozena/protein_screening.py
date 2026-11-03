@@ -1,7 +1,7 @@
 """
 FAZENA Tools — ProteinScreening Compatibility Class
 Wraps ConPLex protein screening engine in modules/conplex_screener.py
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk (@MrEgorin), FAZENA
 """
 
 from typing import List, Dict, Optional
