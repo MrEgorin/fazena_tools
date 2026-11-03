@@ -24,6 +24,7 @@
 - [Repository Structure](#repository-structure)
 - [Input Formats and Compatibility](#input-formats-and-compatibility)
 - [Automated Test Suite](#automated-test-suite)
+- [Foundational Frameworks & Attribution](#foundational-frameworks--attribution)
 - [Authors and Citation](#authors-and-citation)
 - [AI-Assisted Engineering & Code Automation](#ai-assisted-engineering--code-automation)
 
@@ -60,17 +61,17 @@ Key technical features:
 
 ### 1. RNA Hunter (RNA Target Screening)
 
-Designed for RNA-targeted therapeutics, riboswitches, and viral RNA secondary motifs:
+Designed for RNA-targeted therapeutics, riboswitches, and viral RNA secondary motifs (powered by the **SMARTBind** framework):
 
-- **Virtual Target Screening:** Evaluates chemical libraries against target RNA sequences using a scoring model based on planar base-stacking, phosphate backbone electrostatics, and groove hydrogen-bonding networks.
-- **Binding Site Discovery:** Resolves residue-level interaction propensities across the entire RNA sequence and highlights potential binding pockets.
+- **Virtual Target Screening:** Integrates **SMARTBind** sequence-based inference to evaluate chemical libraries against target RNA sequences using a scoring model based on planar base-stacking, phosphate backbone electrostatics, and groove hydrogen-bonding networks.
+- **Binding Site Discovery:** Uses SMARTBind residue-level propensities across the entire RNA sequence to highlight potential binding pockets without requiring experimental 3D RNA structures.
 - **Automated RNA Docking:** Automated rigid receptor conversion and AutoDock Vina docking for top candidate molecules.
 
 ### 2. Prozena (Protein Target Screening)
 
-Engineered for high-throughput screening against macromolecular protein targets:
+Engineered for high-throughput screening against macromolecular protein targets (adapting **BarlowDTI** and **ConPLex** representations):
 
-- **ConPLex Contrastive Co-Embedding:** Screen thousands of candidate compounds against protein sequences in seconds using the pre-trained ConPLex model (`weights/models/ConPLex_v1_BindingDB.pt`).
+- **Contrastive Co-Embedding (BarlowDTI & ConPLex):** Incorporates self-supervised contrastive learning principles from **BarlowDTI** alongside pre-trained ConPLex embeddings (`weights/models/ConPLex_v1_BindingDB.pt`) to map small molecules and protein targets into a joint latent metric space for sub-second virtual screening.
 - **ADMET Pre-Screening Gate:** Enforces user-configurable thresholds for Molecular Weight, LogP, H-Bond Donors/Acceptors, TPSA, reactive functional groups, and PAINS alerts.
 - **Automated Top-5 Docking and Ki Calculation:** Docks the top 5 ranked hits into the uploaded target PDB file, reporting binding affinity (kcal/mol) and estimated inhibition constants (Ki).
 - **Interactive Inspection:** Integrated 3D structure viewer (py3Dmol) and 2D interaction fingerprint tags (ProLIF).
@@ -240,6 +241,20 @@ Ran 6 tests in 4.5s
 
 OK
 ```
+
+---
+
+## Foundational Frameworks & Attribution
+
+FAZENA Tools builds upon, adapts, and acknowledges foundational algorithms and architectures from established open-source computational drug discovery frameworks:
+
+### 1. SMARTBind (Small Molecule Approaches to RNA Targeting Binder Discovery)
+- **Where Used:** Core engine behind **RNA Hunter** (`modules/smartbind_wrapper.py`, `inference.py`, and notebooks).
+- **Purpose:** Used for structure-agnostic, sequence-based RNA virtual screening and per-nucleotide binding site prediction. SMARTBind enables rapid scoring and candidate pocket identification directly from primary RNA sequence inputs, removing the dependency on solved 3D RNA crystallographic structures.
+
+### 2. BarlowDTI (Barlow Twins for Drug-Target Interaction)
+- **Where Used:** Representation and screening architecture in **Prozena** (`modules/prozena/` and `modules/conplex_screener.py`) and **Refazenation** target profiling.
+- **Purpose:** Used as the guiding methodology for contrastive self-supervised feature alignment between small-molecule chemical structures (Morgan fingerprints/SMILES) and protein target representations. This allows ultra-fast, sub-second affinity prediction and large-scale proteome library screening prior to physics-based docking.
 
 ---
 
