@@ -1,1 +1,26 @@
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Streamlit & environments
+.streamlit/
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Output directories & scratch files
+output/
+tmp/
+*.log
+
+# Aider chat history
 .aider*
+
+# OS artifacts
+.DS_Store
+Thumbs.db

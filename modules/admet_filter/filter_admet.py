@@ -1,69 +1,55 @@
-from typing import List, Dict
+"""
+FAZENA Tools — ADMEFilter Compatibility Wrapper
+Wraps the consolidated ADMET engine in modules/admet.py
+Author: Yehor Franchuk, MrEgorin, FAZENA
+"""
+
+from typing import Dict, Any, List
 from rdkit import Chem
-from rdkit.Chem import Descriptors, rdMolDescriptors
-import pandas as pd
+from modules.admet import (
+    evaluate_admet,
+    check_pains,
+    check_reactive_groups,
+    calculate_physchem_properties
+)
 
 class ADMEFilter:
+    """Legacy compatibility class wrapping the enhanced ADMET engine."""
+    
     def __init__(self):
-        self.pains = self.load_pains()
+        pass
 
-    def load_pains(self) -> pd.DataFrame:
-        # Load PAINS data from a CSV file or other source
-        # For demonstration purposes, we'll create a mock DataFrame
-        return pd.DataFrame({
-            'smarts': ['C1=CC(=O)N2C=C(C=C1)C3=CC=CC=C32',  # Example PAINS pattern
-                      'C1=CC(=O)NC1'],
-            'name': ['PAINS_Aromatic_Aldehyde', 'PAINS_Aromatic_Ketone']
-        })
-
-    def filter(self, smiles: str) -> Dict[str, any]:
-        try:
-            mol = Chem.MolFromSmiles(smiles)
-            if mol is None:
-                raise ValueError("Invalid SMILES string")
-
-            # Calculate properties
-            mw = Descriptors.MolWt(mol)
-            logp = rdMolDescriptors.CalcClogP(mol)
-            hbd = rdMolDescriptors.CalcNumHBD(mol)
-            hba = rdMolDescriptors.CalcNumHBA(mol)
-            tpsa = rdMolDescriptors.CalcTPSA(mol)
-
-            # Check Lipinski's Rule of Five
-            lipinski_passed = (mw <= 500) and (logp <= 5) and (hbd <= 5) and (hba <= 10)
-
-            # Check PAINS patterns
-            pains_passed, pains_reasons = self.check_pains(mol)
-
-            # Overall passed status
-            passed = lipinski_passed and pains_passed
-
-            return {
-                'passed': passed,
-                'lipinski_passed': lipinski_passed,
-                'pains_passed': pains_passed,
-                'reasons_for_failure': pains_reasons if not passed else [],
-                'properties': {
-                    'MW': mw,
-                    'LogP': logp,
-                    'HBD': hbd,
-                    'HBA': hba,
-                    'TPSA': tpsa
-                }
-            }
-
-        except Exception as e:
+    def filter(self, smiles: str) -> Dict[str, Any]:
+        """Filters a single SMILES string using full Lipinski, PAINS, and reactive checks."""
+        res = evaluate_admet(smiles, filter_pains=True, filter_reactive=True)
+        if not res.get('valid', False):
             return {
                 'passed': False,
-                'lipinski_passed': None,
-                'pains_passed': None,
-                'reasons_for_failure': [str(e)],
+                'lipinski_passed': False,
+                'pains_passed': False,
+                'reasons_for_failure': res.get('reasons', ['Invalid SMILES']),
                 'properties': {}
             }
+        
+        lipinski_ok = (res.get('lipinski_violations', 0) == 0)
+        pains_ok = not res.get('has_pains', False)
+        
+        return {
+            'passed': res.get('passed', False),
+            'lipinski_passed': lipinski_ok,
+            'pains_passed': pains_ok,
+            'reasons_for_failure': res.get('reasons', []),
+            'properties': {
+                'MW': res.get('MW'),
+                'LogP': res.get('LogP'),
+                'HBD': res.get('HBD'),
+                'HBA': res.get('HBA'),
+                'TPSA': res.get('TPSA'),
+                'RotBonds': res.get('RotBonds'),
+                'QED': res.get('QED')
+            }
+        }
 
-    def check_pains(self, mol) -> (bool, List[str]):
-        pains_reasons = []
-        for index, row in self.pains.iterrows():
-            if mol.HasSubstructMatch(Chem.MolFromSmarts(row['smarts'])):
-                pains_reasons.append(row['name'])
-        return len(pains_reasons) == 0, pains_reasons
+    def check_pains(self, mol: Chem.Mol) -> (bool, List[str]):
+        has_pains, alerts = check_pains(mol)
+        return (not has_pains, alerts)

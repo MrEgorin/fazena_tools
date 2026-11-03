@@ -818,10 +818,11 @@ def render_capability_card(icon, title, description):
 
 
 def render_footer():
-    """Render the Fazena footer branding."""
+    """Render the Fazena footer branding with creator attribution."""
     st.markdown("""
     <div class="fazena-footer-brand">
-        Developed by <a href="https://www.fazena.org" target="_blank">FAZENA</a>
+        Developed by <a href="https://www.fazena.org" target="_blank">FAZENA</a> &bull;
+        <span style="opacity: 0.85; font-size: 0.72rem; letter-spacing: 1px;">Yehor Franchuk, MrEgorin, FAZENA</span>
     </div>
     """, unsafe_allow_html=True)
 

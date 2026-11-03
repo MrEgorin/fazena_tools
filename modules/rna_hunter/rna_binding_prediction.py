@@ -1,34 +1,24 @@
-from typing import List, Dict
-import numpy as np
+"""
+FAZENA Tools — RNAHunter Compatibility Class
+Wraps RNA screening & binding site engine in modules/rna_screener.py
+Author: Yehor Franchuk, MrEgorin, FAZENA
+"""
+
+from typing import Dict, List, Optional
+from modules.rna_screener import screen_rna_library, predict_rna_binding_sites
 
 class RNAHunter:
-    def __init__(self, model_path: str):
-        self.model = None  # Placeholder for actual model loading
-        self.load_model(model_path)
+    """Programmatic API for RNA virtual screening and binding site prediction."""
+    def __init__(self, model_path: Optional[str] = None):
+        self.model_path = model_path
 
-    def load_model(self, model_path: str):
-        """Load the model from a file."""
-        # Placeholder for model loading logic
-        pass
+    def predict(self, rna_sequence: str, smiles_list: Optional[List[str]] = None) -> Dict[str, float]:
+        """Predicts binding scores for smiles list against target RNA sequence."""
+        if not smiles_list:
+            smiles_list = ["CCO"]
+        ligands = [{'name': f"Mol_{i+1}", 'SMILES': s} for i, s in enumerate(smiles_list)]
+        df = screen_rna_library(rna_sequence, ligands)
+        return dict(zip(df['SMILES'], df['Binding_Score']))
 
-    def generate_features(self, rna_sequence: str) -> np.ndarray:
-        """Generate features for the RNA sequence."""
-        # Simple feature embedding (e.g., one-hot encoding)
-        alphabet = 'ACGU'
-        features = np.zeros((len(rna_sequence), len(alphabet)))
-        for i, char in enumerate(rna_sequence):
-            if char in alphabet:
-                features[i, alphabet.index(char)] = 1
-        return features.flatten()
-
-    def predict(self, rna_sequence: str) -> Dict[str, float]:
-        """Predict binding affinities for the RNA sequence."""
-        if not isinstance(rna_sequence, str) or not rna_sequence:
-            raise ValueError("Invalid RNA sequence")
-        
-        # Generate features
-        features = self.generate_features(rna_sequence)
-        
-        # Placeholder logic for scoring
-        score = np.random.rand()  # Random score for demonstration
-        return {'binding_affinity': score}
+    def predict_binding_sites(self, rna_sequence: str, ligand_smiles: str) -> List[float]:
+        return predict_rna_binding_sites(rna_sequence, ligand_smiles)
