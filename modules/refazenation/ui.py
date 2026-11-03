@@ -1,7 +1,8 @@
 """
 FAZENA Tools — Refazenation Target Prediction & Reverse Docking
 Fast Target Prediction (SwissTargetPrediction alternative) and automated AutoDock Vina reverse docking.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Affiliation: Institute of Cell Biology NASU
 """
 
 import streamlit as st
@@ -127,33 +128,63 @@ def render_page():
                 accept_multiple_files=True,
                 key="rev_pdbs"
             )
+            use_builtin_targets = st.checkbox("Include built-in reference target panel (Kinase 9MXC, 9MHF, RNA model)", value=not bool(uploaded_pdbs), key="rev_builtin")
             if uploaded_pdbs:
-                st.info(f"Loaded **{len(uploaded_pdbs)}** target structures for reverse docking panel.")
+                st.info(f"Loaded **{len(uploaded_pdbs)}** custom target structures.")
+            elif use_builtin_targets:
+                st.info("Loaded **3** reference target structures for reverse docking.")
 
         st.markdown("</div>", unsafe_allow_html=True)
 
         render_section_divider()
 
+        with st.expander("⚙️ Reverse Docking Parameters", expanded=False):
+            col_rp1, col_rp2, col_rp3 = st.columns(3)
+            with col_rp1:
+                rev_exhaustiveness = st.slider("Exhaustiveness", min_value=1, max_value=24, value=6, step=1, key="rev_ex")
+            with col_rp2:
+                rev_n_poses = st.slider("Poses per Target", min_value=1, max_value=10, value=3, step=1, key="rev_nposes")
+            with col_rp3:
+                rev_seed = st.number_input("Random Seed", min_value=0, max_value=999999, value=42, step=1, key="rev_seed")
+
         if st.button("⚡ Execute Multi-Target Reverse Docking", use_container_width=True):
             if not dock_smi:
                 st.error("Please provide a ligand SMILES."); return
-            if not uploaded_pdbs:
-                st.error("Please upload one or more protein target PDB files."); return
+            
+            # Prepare targets list
+            targets_to_dock = []
+            if uploaded_pdbs:
+                for f in uploaded_pdbs:
+                    targets_to_dock.append((f.name, f.getvalue().decode('utf-8', errors='ignore'), False))
+            
+            if use_builtin_targets or not targets_to_dock:
+                base_dir = os.path.dirname(os.path.dirname(__file__))
+                b1 = os.path.join(base_dir, "tools", "AutoRevDock", "examples", "pro", "9MXC_A.pdb")
+                b2 = os.path.join(base_dir, "tools", "AutoRevDock", "examples", "pro", "9MHF_A.pdb")
+                b3 = os.path.join(base_dir, "rna_model.pdb")
+                for path, is_rna in [(b1, False), (b2, False), (b3, True)]:
+                    if os.path.exists(path):
+                        with open(path, 'r') as fp:
+                            targets_to_dock.append((os.path.basename(path), fp.read(), is_rna))
+
+            if not targets_to_dock:
+                st.error("Please upload one or more target PDB files or select built-in targets."); return
 
             dock_results = []
             progress_bar = st.progress(0)
             status_text = st.empty()
 
-            for i, pdb_file in enumerate(uploaded_pdbs):
-                status_text.text(f"Docking against {pdb_file.name} ({i+1}/{len(uploaded_pdbs)})...")
-                pdb_content = pdb_file.getvalue().decode('utf-8', errors='ignore')
+            for i, (t_name, pdb_content, is_rna) in enumerate(targets_to_dock):
+                status_text.text(f"Docking against {t_name} ({i+1}/{len(targets_to_dock)})...")
                 
                 res = dock_single_compound(
                     receptor_pdb=pdb_content,
                     ligand_smiles=dock_smi,
-                    compound_name=pdb_file.name,
-                    exhaustiveness=6,
-                    n_poses=3
+                    compound_name=t_name,
+                    exhaustiveness=rev_exhaustiveness,
+                    n_poses=rev_n_poses,
+                    seed=rev_seed,
+                    is_rna=is_rna
                 )
                 
                 score = res.get('affinity', 0.0)
@@ -161,7 +192,8 @@ def render_page():
                 logka = round(math.log10(max(ka, 1.0)), 2) if ka > 0 else 0.0
 
                 dock_results.append({
-                    'Target Protein': pdb_file.name,
+                    'Target Macromolecule': t_name,
+                    'Target Type': 'RNA' if is_rna else 'Protein',
                     'Vina Score (kcal/mol)': score,
                     'Estimated Ki': res.get('ki_estimated', 'N/A'),
                     'Ka (M⁻¹)': f"{ka:.2e}",
@@ -169,13 +201,13 @@ def render_page():
                     'Status': res.get('status'),
                     'complex_pdb': res.get('complex_pdb', '')
                 })
-                progress_bar.progress((i + 1) / len(uploaded_pdbs))
+                progress_bar.progress((i + 1) / len(targets_to_dock))
 
             progress_bar.empty()
             status_text.empty()
             dock_results.sort(key=lambda x: x.get('Vina Score (kcal/mol)', 0.0))
             st.session_state['reverse_dock_results'] = dock_results
-            render_success_alert(f"Reverse Docking Complete across {len(uploaded_pdbs)} targets!")
+            render_success_alert(f"Reverse Docking Complete across {len(targets_to_dock)} targets!")
 
         if 'reverse_dock_results' in st.session_state:
             rev_res = st.session_state['reverse_dock_results']
@@ -187,20 +219,20 @@ def render_page():
             render_section_divider()
 
             # 3D inspection
-            st.markdown("#### 🔍 3D Complex & Interaction Inspector")
-            valid_targets = [r['Target Protein'] for r in rev_res if r.get('Status') == 'Success']
+            st.markdown("#### 🔍 3D Complex & 2D Interaction Inspector")
+            valid_targets = [r['Target Macromolecule'] for r in rev_res if r.get('Status') == 'Success']
             if valid_targets:
-                chosen_target = st.selectbox("Select Target Complex to View", valid_targets)
-                chosen_data = next((r for r in rev_res if r['Target Protein'] == chosen_target), None)
+                chosen_target = st.selectbox("Select Target Complex to Inspect", valid_targets)
+                chosen_data = next((r for r in rev_res if r['Target Macromolecule'] == chosen_target), None)
                 if chosen_data and chosen_data.get('complex_pdb'):
                     col_3d, col_2d = st.columns([3, 2])
                     with col_3d:
                         st.caption(f"3D Complex: Ligand in {chosen_target}")
                         render_complex_3d(chosen_data['complex_pdb'], height=450)
                     with col_2d:
-                        st.caption("2D Binding Residue Interactions (ProLIF)")
+                        st.caption("2D Binding Residue Interactions & Topology")
                         inter_summary = analyze_interactions(chosen_data['complex_pdb'])
-                        render_interaction_summary_ui(inter_summary)
+                        render_interaction_summary_ui(inter_summary, complex_pdb_str=chosen_data['complex_pdb'])
                         st.download_button(
                             "📥 Download Complex PDB",
                             chosen_data['complex_pdb'],

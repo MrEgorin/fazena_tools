@@ -1,7 +1,8 @@
 """
 FAZENA Tools — Modular Drug Discovery Platform
 Unified Streamlit Application for RNA Hunter, Prozena, and Refazenation.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Affiliation: Institute of Cell Biology NASU
 """
 
 import streamlit as st
@@ -21,18 +22,34 @@ import modules.binding_prediction as rna_bsp
 import modules.prozena as prozena_page
 import modules.refazenation as refazenation_page
 
-# Inject custom FAZENA design system CSS
+# Inject custom FAZENA design system CSS (Blue-Green fazena.org theme)
 inject_custom_css()
 
 def render_home_dashboard():
     """Renders the central platform dashboard overview."""
     st.markdown("""
     <div style='text-align: center; padding: 2.5rem 1rem 1.5rem;'>
-        <h1 class='hero-title' style='font-size: 2.6rem; margin-bottom: 0.5rem;'>FAZENA TOOLS</h1>
-        <p style='color: var(--fz-text-muted); font-size: 1.15rem; max-width: 750px; margin: 0 auto 2rem; line-height: 1.7;'>
+        <div style='display: inline-flex; align-items: center; gap: 8px; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 20px; padding: 4px 14px; margin-bottom: 1rem;'>
+            <span style='color: #10b981; font-size: 0.8rem; font-weight: 700; letter-spacing: 1.5px;'>FAZENA BIOCOMPUTATIONAL PLATFORM</span>
+        </div>
+        <h1 class='hero-title' style='font-size: 2.8rem; margin-bottom: 0.6rem; background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
+            FAZENA TOOLS
+        </h1>
+        <p style='color: var(--fz-text-muted); font-size: 1.15rem; max-width: 780px; margin: 0 auto 1.5rem; line-height: 1.7;'>
             Next-generation modular bio-computational platform for RNA and protein drug discovery,
-            powered by contrastive machine learning and AutoDock Vina physics engines.
+            powered by contrastive machine learning (ConPLex) and AutoDock Vina physics engines.
         </p>
+        <div style='display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 1.5rem;'>
+            <span style='background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.25); color: #38bdf8; font-size: 0.78rem; padding: 3px 10px; border-radius: 12px;'>
+                🔒 100% Offline Real Weights & Physics
+            </span>
+            <span style='background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; font-size: 0.78rem; padding: 3px 10px; border-radius: 12px;'>
+                🚫 Zero External General LLMs (No Gemini / GPT / Claude)
+            </span>
+            <span style='background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc; font-size: 0.78rem; padding: 3px 10px; border-radius: 12px;'>
+                🏛️ Institute of Cell Biology NASU
+            </span>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -40,9 +57,9 @@ def render_home_dashboard():
 
     with col1:
         st.markdown("""
-        <div class='capability-card' style='height: 100%;'>
+        <div class='capability-card' style='height: 100%; border-top: 3px solid #10b981;'>
             <div class='cap-icon'>🧬</div>
-            <div class='cap-title'>RNA Hunter</div>
+            <div class='cap-title' style='color: #10b981;'>RNA Hunter</div>
             <div class='cap-desc'>
                 Structure-agnostic virtual screening and nucleotide-resolution binding site discovery 
                 against target RNA architectures with physics-grounded pharmacophores and AutoDock Vina docking.
@@ -52,9 +69,9 @@ def render_home_dashboard():
 
     with col2:
         st.markdown("""
-        <div class='capability-card' style='height: 100%;'>
+        <div class='capability-card' style='height: 100%; border-top: 3px solid #0ea5e9;'>
             <div class='cap-icon'>🔬</div>
-            <div class='cap-title'>Prozena</div>
+            <div class='cap-title' style='color: #0ea5e9;'>Prozena</div>
             <div class='cap-desc'>
                 High-throughput screening against protein targets using the ConPLex contrastive co-embedding model,
                 integrated with Lipinski/PAINS ADMET filtering and automated Top-5 AutoDock Vina docking.
@@ -64,9 +81,9 @@ def render_home_dashboard():
 
     with col3:
         st.markdown("""
-        <div class='capability-card' style='height: 100%;'>
+        <div class='capability-card' style='height: 100%; border-top: 3px solid #38bdf8;'>
             <div class='cap-icon'>🔄</div>
-            <div class='cap-title'>Refazenation</div>
+            <div class='cap-title' style='color: #38bdf8;'>Refazenation</div>
             <div class='cap-desc'>
                 Fast biological target prediction (SwissTargetPrediction alternative) and multi-target reverse docking
                 across therapeutic classes to identify polypharmacology and repurposing candidates.
@@ -99,14 +116,14 @@ def render_home_dashboard():
 def main():
     # ═════════════════════════════════════════════════════════════════
     # SIDEBAR NAVIGATION
-    # ═════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════
     with st.sidebar:
         st.markdown("""
         <div style='padding: 1rem 0 0.5rem; text-align: left;'>
-            <div style='font-family: var(--fz-font-heading); font-size: 1.4rem; color: var(--fz-text); letter-spacing: 1.5px;'>
+            <div style='font-family: var(--fz-font-heading); font-size: 1.45rem; letter-spacing: 1.5px; background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>
                 FAZENA <span style='color: var(--fz-accent);'>TOOLS</span>
             </div>
-            <div style='font-size: 0.72rem; color: var(--fz-text-dim); text-transform: uppercase; letter-spacing: 1px;'>
+            <div style='font-size: 0.72rem; color: #10b981; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;'>
                 Biocomputational Drug Foundry
             </div>
         </div>
@@ -143,16 +160,17 @@ def main():
             page = "Overview"
 
         st.markdown("""
-        <div style='margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--fz-border); font-size: 0.72rem; color: var(--fz-text-dim); line-height: 1.5;'>
-            <b>FAZENA Discovery Suite</b><br>
-            Developed by <a href="https://www.fazena.org" target="_blank" style="color: var(--fz-accent); text-decoration: none;">FAZENA</a><br>
-            <span style="opacity: 0.85;">Yehor Franchuk, MrEgorin, FAZENA</span>
+        <div style='margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--fz-border); font-size: 0.74rem; color: var(--fz-text-dim); line-height: 1.6;'>
+            <b style="color: #10b981;">FAZENA Discovery Suite</b><br>
+            Developed by <a href="https://www.fazena.org" target="_blank" style="color: var(--fz-accent); text-decoration: none; font-weight: 600;">FAZENA</a><br>
+            <span>Lead: <b>Yehor Franchuk (MrEgorin)</b></span><br>
+            <span style="opacity: 0.9; color: #a855f7;">Institute of Cell Biology NASU</span>
         </div>
         """, unsafe_allow_html=True)
 
     # ═════════════════════════════════════════════════════════════════
     # PAGE ROUTER
-    # ═════════════════════════════════════════════════════════════════
+    # ═════════════════════════════════════════════════════════════
     if product == "RNA Hunter":
         if page == "Virtual Target Screening":
             rna_vs.render_page()

@@ -1,7 +1,8 @@
 """
 FAZENA Tools — Unified AutoDock Vina Docking & Interaction Engine
 Pure Python receptor and ligand preparation with AutoDock Vina and ProLIF.
-Author: Yehor Franchuk, MrEgorin, FAZENA
+Author: Yehor Franchuk, MrEgorin, FAZENA (fazena.org)
+Affiliation: Institute of Cell Biology NASU
 """
 
 from typing import List, Dict, Any, Tuple, Optional
@@ -21,15 +22,48 @@ from modules.config import HARDWARE, DOCKING_CONFIG
 # ═════════════════════════════════════════════════════════════════════
 
 SOLVENT_RESIDUES = {
-    'HOH', 'WAT', 'SOL', 'TIP3', 'TIP4', 'CL', 'NA', 'MG', 'K', 'CA', 'ZN',
-    'PO4', 'SO4', 'ACT', 'EDO', 'DMS'
+    'HOH', 'WAT', 'SOL', 'TIP3', 'TIP4', 'DOD', 'CL', 'NA', 'K', 'SO4', 'PO4',
+    'ACT', 'FMT', 'EDO', 'DMS', 'GOL', 'PEG', 'TRS', 'HEPES', 'MES', 'BOG', 'MPD'
 }
-AROMATIC_RES = {'PHE', 'TYR', 'TRP', 'HIS'}
+PROTEIN_AROMATIC_RES = {'PHE', 'TYR', 'TRP', 'HIS'}
+RNA_PURINES = {'A', 'G', 'I', 'ADE', 'GUA', 'INO', 'RA', 'RG', 'RI', 'DA', 'DG', 'DI', '1MA', '7MG', '2MG', 'M2G'}
+RNA_PYRIMIDINES = {'U', 'C', 'T', 'URA', 'CYT', 'THY', 'RU', 'RC', 'RT', 'DU', 'DC', 'DT', '5MC', 'OMC', 'OMG', 'PSU', 'H2U'}
+ALL_NUCLEIC_RES = RNA_PURINES | RNA_PYRIMIDINES
+
+PURINE_AROMATIC_CARBONS = {'C2', 'C4', 'C5', 'C6', 'C8'}
+PURINE_ACCEPTOR_NITROGENS = {'N1', 'N3', 'N7'}
+PYRIMIDINE_AROMATIC_CARBONS = {'C2', 'C4', 'C5', 'C6'}
+PYRIMIDINE_ACCEPTOR_NITROGENS = {'N3'}
+NUCLEIC_POLAR_HYDROGENS = {
+    'H1', 'H3', 'H21', 'H22', 'H41', 'H42', 'H61', 'H62', '1H2', '2H2', '1H4', '2H4', '1H6', '2H6',
+    "HO2'", "2HO'", "HO3'", "HO5'", 'HD1', 'HE1', 'HE2', 'HD2', 'HG', 'HG1', 'HH'
+}
+
+# AutoDock 4 and AutoDock Vina strictly require case-sensitive atom types
+VALID_VINA_TYPES = {'C', 'A', 'N', 'NA', 'OA', 'S', 'SA', 'HD', 'P', 'F', 'Cl', 'Br', 'I', 'Zn', 'Mg', 'Mn', 'Ca', 'Fe'}
+
+TWO_LETTER_METALS = {
+    'CL': 'Cl', 'BR': 'Br', 'ZN': 'Zn', 'MG': 'Mg', 'MN': 'Mn', 'CA': 'Ca', 'FE': 'Fe'
+}
+
+PDBQT_TYPE_TO_ELEMENT = {
+    'A': 'C', 'C': 'C',
+    'OA': 'O', 'O': 'O',
+    'NA': 'N', 'N': 'N',
+    'SA': 'S', 'S': 'S',
+    'P': 'P',
+    'HD': 'H', 'H': 'H',
+    'F': 'F', 'CL': 'Cl', 'Cl': 'Cl', 'BR': 'Br', 'Br': 'Br', 'I': 'I',
+    'ZN': 'Zn', 'Zn': 'Zn', 'MG': 'Mg', 'Mg': 'Mg', 'CA': 'Ca', 'Ca': 'Ca',
+    'FE': 'Fe', 'Fe': 'Fe', 'MN': 'Mn', 'Mn': 'Mn'
+}
 
 def prepare_receptor_pdbqt(pdb_content: str, is_rna: bool = False) -> Optional[str]:
     """
     Pure Python converter from PDB structure to rigid AutoDock Vina receptor PDBQT.
-    Maps atom types and removes water/ions.
+    Supports protein, RNA, and nucleic acid receptors with accurate case-sensitive atom typing.
+    Robustly handles atom names with leading indices (e.g. 1H5', 2H5'), strips non-polar hydrogens,
+    and maps modified residues/metals to valid Vina types without crashes.
     """
     if not pdb_content or not pdb_content.strip():
         return None
@@ -39,35 +73,77 @@ def prepare_receptor_pdbqt(pdb_content: str, is_rna: bool = False) -> Optional[s
 
     for line in pdb_content.splitlines():
         if line.startswith(('ATOM', 'HETATM')):
-            res_name = line[17:20].strip()
+            res_name = line[17:20].strip().upper()
             if res_name in SOLVENT_RESIDUES:
                 continue
             atom_name = line[12:16].strip()
+            atom_name_u = atom_name.upper()
 
-            # Skip non-polar hydrogens (AutoDock uses united-atom or polar only)
-            if atom_name.startswith('H') and not atom_name.startswith('HD'):
-                continue
-
-            elem = line[76:78].strip() if len(line) >= 78 and line[76:78].strip() else atom_name[0]
-            elem = elem.upper()
-
-            # Map AutoDock atom type
-            if elem == 'C':
-                ad_type = 'A' if res_name in AROMATIC_RES and atom_name not in ('C', 'CA', 'CB') else 'C'
-            elif elem == 'O':
-                ad_type = 'OA'
-            elif elem == 'N':
-                ad_type = 'NA' if res_name in ('HIS', 'TRP') and atom_name.startswith('N') else 'N'
-            elif elem == 'S':
-                ad_type = 'SA'
-            elif elem == 'P':
-                ad_type = 'P'
-            elif elem in ('F', 'CL', 'BR', 'I', 'ZN', 'MG', 'CA', 'FE'):
-                ad_type = elem
-            elif elem == 'H':
-                ad_type = 'HD'
+            # Extract element symbol
+            elem = ''
+            if len(line) >= 78 and line[76:78].strip():
+                elem = line[76:78].strip().upper()
             else:
-                ad_type = elem[:2]
+                # Deduce element by stripping leading numbers and whitespace
+                cleaned = atom_name_u.lstrip('0123456789')
+                if len(cleaned) >= 2 and cleaned[:2] in TWO_LETTER_METALS:
+                    elem = cleaned[:2]
+                elif cleaned:
+                    elem = cleaned[0]
+
+            # Hydrogen handling: skip non-polar hydrogens, keep polar hydrogens as HD
+            if elem == 'H' or 'H' in atom_name_u:
+                cleaned_h = atom_name_u.lstrip('0123456789')
+                if cleaned_h.startswith('H'):
+                    if atom_name_u in NUCLEIC_POLAR_HYDROGENS or cleaned_h.startswith(('HD', 'HE', 'HG', 'HH')) or atom_name_u.startswith(('H1', 'H3')):
+                        ad_type = 'HD'
+                    else:
+                        continue  # Skip non-polar hydrogens in rigid receptor
+                else:
+                    elem = cleaned_h[0]
+
+            if elem != 'H':
+                if elem == 'C':
+                    if is_rna or res_name in ALL_NUCLEIC_RES:
+                        clean_atom = atom_name_u.rstrip("'*")
+                        if (res_name in RNA_PURINES and clean_atom in PURINE_AROMATIC_CARBONS) or \
+                           (res_name in RNA_PYRIMIDINES and clean_atom in PYRIMIDINE_AROMATIC_CARBONS) or \
+                           (clean_atom in ('C2', 'C4', 'C5', 'C6', 'C8') and "'" not in atom_name_u and "*" not in atom_name_u):
+                            ad_type = 'A'
+                        else:
+                            ad_type = 'C'
+                    elif res_name in PROTEIN_AROMATIC_RES and atom_name_u not in ('C', 'CA', 'CB'):
+                        ad_type = 'A'
+                    else:
+                        ad_type = 'C'
+                elif elem == 'O':
+                    ad_type = 'OA'
+                elif elem == 'N':
+                    if is_rna or res_name in ALL_NUCLEIC_RES:
+                        if (res_name in RNA_PURINES and atom_name_u in PURINE_ACCEPTOR_NITROGENS) or \
+                           (res_name in RNA_PYRIMIDINES and atom_name_u in PYRIMIDINE_ACCEPTOR_NITROGENS):
+                            ad_type = 'NA'
+                        else:
+                            ad_type = 'N'
+                    elif res_name in ('HIS', 'TRP') and atom_name_u.startswith('N'):
+                        ad_type = 'NA'
+                    else:
+                        ad_type = 'N'
+                elif elem == 'S':
+                    ad_type = 'SA'
+                elif elem == 'SE':
+                    ad_type = 'SA'  # Map selenium to SA
+                elif elem == 'P':
+                    ad_type = 'P'
+                elif elem in TWO_LETTER_METALS:
+                    ad_type = TWO_LETTER_METALS[elem]
+                elif elem in ('F', 'I'):
+                    ad_type = elem
+                else:
+                    ad_type = 'C'  # Safe default fallback
+
+            if ad_type not in VALID_VINA_TYPES:
+                ad_type = 'C'
 
             base = line[:54]
             pdbqt_line = f"{base:<54}  1.00  0.00    +0.000 {ad_type:<2}"
@@ -83,30 +159,64 @@ def prepare_receptor_pdbqt(pdb_content: str, is_rna: bool = False) -> Optional[s
 
 def prepare_ligand_pdbqt(smiles_or_mol: Any) -> Tuple[Optional[str], Optional[Chem.Mol]]:
     """
-    Converts a ligand (SMILES or RDKit Mol) into an AutoDock PDBQT string with 3D coordinates.
+    Converts a ligand (SMILES, SDF file path/block, PDB file path/block, or RDKit Mol)
+    into an AutoDock PDBQT string with 3D coordinates.
     Uses RDKit ETKDGv3 embedding + MMFF optimization + Meeko preparation.
     """
     try:
+        mol = None
         if isinstance(smiles_or_mol, str):
-            mol = Chem.MolFromSmiles(smiles_or_mol)
-        else:
+            input_str = smiles_or_mol.strip()
+            # 1. Check if it's an existing file path
+            if os.path.isfile(input_str):
+                ext = os.path.splitext(input_str)[1].lower()
+                if ext in ('.sdf', '.mol'):
+                    suppl = Chem.SDMolSupplier(input_str, removeHs=False)
+                    if suppl and len(suppl) > 0 and suppl[0] is not None:
+                        mol = suppl[0]
+                elif ext == '.pdb':
+                    mol = Chem.MolFromPDBFile(input_str, removeHs=False)
+                elif ext in ('.smi', '.smiles', '.tsv', '.txt'):
+                    with open(input_str) as f:
+                        line = f.readline().strip()
+                        mol = Chem.MolFromSmiles(line.split()[0])
+            # 2. Check if it's an SDF / Mol block string
+            if mol is None and ("M  END" in input_str or "$$$$" in input_str or "V2000" in input_str or "V3000" in input_str):
+                mol = Chem.MolFromMolBlock(input_str, removeHs=False)
+            # 3. Check if it's a PDB block string
+            if mol is None and (input_str.startswith("HEADER") or "ATOM  " in input_str or "HETATM" in input_str):
+                mol = Chem.MolFromPDBBlock(input_str, removeHs=False)
+            # 4. Check if it's a SMILES string
+            if mol is None:
+                token = input_str.split()[0]
+                mol = Chem.MolFromSmiles(token)
+        elif isinstance(smiles_or_mol, Chem.Mol):
             mol = Chem.Mol(smiles_or_mol)
 
         if mol is None:
             return None, None
 
-        # Add hydrogens and generate 3D conformer
-        mol_3d = Chem.AddHs(mol)
-        params = AllChem.ETKDGv3()
-        params.randomSeed = 42
-        embed_res = AllChem.EmbedMolecule(mol_3d, params)
-        if embed_res < 0:
-            AllChem.EmbedMolecule(mol_3d, useRandomCoords=True)
+        # Check if 3D conformer coordinates already exist
+        has_3d = False
+        if mol.GetNumConformers() > 0:
+            conf = mol.GetConformer()
+            if conf.Is3D():
+                has_3d = True
 
-        try:
-            AllChem.MMFFOptimizeMolecule(mol_3d, maxIters=500)
-        except Exception:
-            pass
+        if not has_3d:
+            mol_3d = Chem.AddHs(mol)
+            params = AllChem.ETKDGv3()
+            params.randomSeed = 42
+            embed_res = AllChem.EmbedMolecule(mol_3d, params)
+            if embed_res < 0:
+                AllChem.EmbedMolecule(mol_3d, useRandomCoords=True)
+
+            try:
+                AllChem.MMFFOptimizeMolecule(mol_3d, maxIters=500)
+            except Exception:
+                pass
+        else:
+            mol_3d = mol
 
         # Meeko PDBQT preparation
         preparator = MoleculePreparation()
@@ -154,14 +264,17 @@ def calculate_grid_box(pdb_content: str, padding: float = 12.0) -> Dict[str, flo
     }
 
 def convert_pose_pdbqt_to_pdb(pose_pdbqt: str) -> str:
-    """Converts a docked ligand PDBQT pose string to standard PDB format."""
+    """
+    Converts a docked ligand PDBQT pose string to standard PDB format.
+    Ensures HETATM records and maps AutoDock types to standard chemical elements.
+    """
     pdb_lines = []
     for line in pose_pdbqt.splitlines():
         if line.startswith(('ATOM', 'HETATM')):
-            # Columns 0-54 coords, then occupancy/temp, then element at 76-78
-            atom_type = line.split()[-1]
-            elem = atom_type[0] if atom_type[0].isalpha() else 'C'
-            clean_line = f"{line[:54]:<54}  1.00  0.00          {elem:>2}"
+            atom_type = line.split()[-1].upper()
+            elem = PDBQT_TYPE_TO_ELEMENT.get(atom_type, 'C')
+            # Standard PDB HETATM line format with valid element symbol
+            clean_line = f"HETATM{line[6:54]:<48}  1.00  0.00          {elem:>2}"
             pdb_lines.append(clean_line)
     return "\n".join(pdb_lines) + "\nEND\n"
 
@@ -175,11 +288,16 @@ def dock_single_compound(
     compound_name: str = "Compound",
     grid_box: Optional[Dict[str, float]] = None,
     exhaustiveness: int = 8,
-    n_poses: int = 3,
+    n_poses: int = 5,
+    energy_range: float = 3.0,
+    seed: int = 0,
+    cpu: Optional[int] = None,
+    sf_name: str = "vina",
     is_rna: bool = False
 ) -> Dict[str, Any]:
     """
-    Executes AutoDock Vina docking for a single ligand against a receptor.
+    Executes AutoDock Vina docking for a single ligand against a protein or RNA receptor.
+    Supports user-customized grid box coordinates, exhaustiveness, pose count, seed, and CPU threads.
     Returns affinities, Ki, docked pose PDBQT, and merged complex PDB.
     """
     if grid_box is None:
@@ -199,18 +317,28 @@ def dock_single_compound(
             f.write(rec_pdbqt)
 
         try:
-            cpu_count = min(os.cpu_count() or 4, 8)
-            v = Vina(sf_name='vina', cpu=cpu_count, verbosity=0)
+            if cpu is None or cpu <= 0:
+                cpu_count = min(os.cpu_count() or 4, 8)
+            else:
+                cpu_count = int(cpu)
+
+            vina_sf = sf_name if sf_name in ('vina', 'vinardo') else 'vina'
+            vina_seed = int(seed) if seed else 0
+
+            v = Vina(sf_name=vina_sf, cpu=cpu_count, seed=vina_seed, verbosity=0)
             v.set_receptor(rec_file)
             v.set_ligand_from_string(lig_pdbqt)
 
-            center = [grid_box['center_x'], grid_box['center_y'], grid_box['center_z']]
-            box_size = [grid_box['size_x'], grid_box['size_y'], grid_box['size_z']]
+            center = [float(grid_box['center_x']), float(grid_box['center_y']), float(grid_box['center_z'])]
+            box_size = [float(grid_box['size_x']), float(grid_box['size_y']), float(grid_box['size_z'])]
             v.compute_vina_maps(center=center, box_size=box_size)
 
-            v.dock(exhaustiveness=exhaustiveness, n_poses=n_poses)
-            energies = v.energies(n_poses=n_poses)
-            poses_pdbqt = v.poses(n_poses=n_poses)
+            v.dock(exhaustiveness=max(1, int(exhaustiveness)), n_poses=max(1, int(n_poses)))
+            energies = v.energies(n_poses=max(1, int(n_poses)), energy_range=float(energy_range))
+            poses_pdbqt = v.poses(n_poses=max(1, int(n_poses)))
+
+            if len(energies) == 0:
+                return {'status': 'Failed', 'error': 'No docking poses converged'}
 
             best_affinity = round(float(energies[0][0]), 2)
             # Estimated Ki: Ki = exp(deltaG / (R * T))
@@ -242,7 +370,10 @@ def dock_single_compound(
                 'top_pose_pdbqt': top_pose_pdbqt,
                 'top_pose_pdb': top_pose_pdb,
                 'complex_pdb': complex_pdb,
-                'grid_box': grid_box
+                'grid_box': grid_box,
+                'exhaustiveness': exhaustiveness,
+                'seed': seed,
+                'scoring_function': vina_sf
             }
         except Exception as e:
             return {'status': 'Failed', 'error': str(e)}
@@ -251,13 +382,24 @@ def dock_top_candidates(
     receptor_pdb: str,
     candidates: List[Dict[str, Any]],
     top_n: int = 5,
+    grid_box: Optional[Dict[str, float]] = None,
+    exhaustiveness: int = 8,
+    n_poses: int = 5,
+    energy_range: float = 3.0,
+    seed: int = 0,
+    cpu: Optional[int] = None,
+    sf_name: str = "vina",
     is_rna: bool = False,
     progress_callback = None
 ) -> List[Dict[str, Any]]:
-    """Docks the top N candidate compounds from virtual screening results."""
+    """
+    Docks candidate compounds with customizable grid box and search parameters.
+    Supports user-specified box dimensions, exhaustiveness, seeds, and scoring functions.
+    """
     results = []
     candidates_to_dock = candidates[:top_n]
-    grid_box = calculate_grid_box(receptor_pdb)
+    if grid_box is None:
+        grid_box = calculate_grid_box(receptor_pdb)
 
     for i, cand in enumerate(candidates_to_dock):
         smiles = cand.get('SMILES', '')
@@ -271,8 +413,12 @@ def dock_top_candidates(
             ligand_smiles=smiles,
             compound_name=name,
             grid_box=grid_box,
-            exhaustiveness=6,
-            n_poses=3,
+            exhaustiveness=exhaustiveness,
+            n_poses=n_poses,
+            energy_range=energy_range,
+            seed=seed,
+            cpu=cpu,
+            sf_name=sf_name,
             is_rna=is_rna
         )
         dock_res.update({k: v for k, v in cand.items() if k not in dock_res})
@@ -284,11 +430,15 @@ def dock_top_candidates(
     return successful + failed
 
 # ═════════════════════════════════════════════════════════════════════
-# 2D RESIDUE INTERACTION ANALYSIS (PROLIF)
+# 2D RESIDUE INTERACTION ANALYSIS (PURE PYTHON + PROLIF HYBRID)
 # ═════════════════════════════════════════════════════════════════════
 
-def analyze_interactions(complex_pdb_str: str) -> Dict[str, Any]:
-    """Analyzes residue-ligand contacts from complex PDB using ProLIF."""
+def analyze_interactions(complex_pdb_str: str, cutoff: float = 4.5) -> Dict[str, Any]:
+    """
+    Analyzes residue-ligand contacts from complex PDB.
+    Uses pure geometric and chemical classification with distance matrix analysis,
+    ensuring robust interaction profiles for both RNA and protein complexes even without explicit hydrogens.
+    """
     summary = {
         'total_interactions': 0,
         'types': {},
@@ -296,45 +446,90 @@ def analyze_interactions(complex_pdb_str: str) -> Dict[str, Any]:
         'has_prolif': True
     }
 
+    if not complex_pdb_str or not complex_pdb_str.strip():
+        return summary
+
     try:
-        import prolif as plf
-        import MDAnalysis as mda
+        rec_atoms = []
+        lig_atoms = []
+        for line in complex_pdb_str.splitlines():
+            if line.startswith(('ATOM', 'HETATM')):
+                try:
+                    res_name = line[17:20].strip().upper()
+                    if res_name in SOLVENT_RESIDUES:
+                        continue
+                    chain = line[21].strip() or 'A'
+                    res_seq = line[22:26].strip()
+                    atom_name = line[12:16].strip().upper()
+                    elem = line[76:78].strip().upper() if len(line) >= 78 and line[76:78].strip() else atom_name.lstrip('0123456789')[:1]
+                    x = float(line[30:38])
+                    y = float(line[38:46])
+                    z = float(line[46:54])
 
-        with tempfile.NamedTemporaryFile('w', suffix='.pdb', delete=False) as f:
-            f.write(complex_pdb_str)
-            f_path = f.name
+                    is_lig = line.startswith('HETATM') or res_name in ('UNL', 'LIG', 'MOL', 'DRG')
+                    atom_dict = {
+                        'res_name': res_name,
+                        'chain': chain,
+                        'res_seq': res_seq,
+                        'atom_name': atom_name,
+                        'elem': elem,
+                        'pos': np.array([x, y, z]),
+                        'is_aromatic': atom_name in PURINE_AROMATIC_CARBONS or atom_name in PYRIMIDINE_AROMATIC_CARBONS or res_name in PROTEIN_AROMATIC_RES
+                    }
+                    if is_lig:
+                        lig_atoms.append(atom_dict)
+                    else:
+                        rec_atoms.append(atom_dict)
+                except Exception:
+                    pass
 
-        try:
-            u = mda.Universe(f_path)
-            ligand_selection = u.select_atoms("resname UNL or resname LIG or resname MOL")
-            if len(ligand_selection) == 0:
-                last_res = u.residues[-1]
-                ligand_selection = last_res.atoms
-                receptor_selection = u.atoms - ligand_selection
-            else:
-                receptor_selection = u.select_atoms("protein or nucleic")
+        if not lig_atoms or not rec_atoms:
+            return summary
 
-            if len(ligand_selection) > 0 and len(receptor_selection) > 0:
-                fp = plf.Fingerprint()
-                fp.run(u.trajectory[0:1], ligand_selection, receptor_selection)
-                df = fp.to_dataframe()
+        interactions_found = []
+        seen_pairs = set()
 
-                interactions_found = []
-                for col in df.columns:
-                    if bool(df[col].iloc[0]):
-                        res_name = str(col[1])
-                        interaction_type = str(col[2])
-                        interactions_found.append({
-                            'residue': res_name,
-                            'type': interaction_type
-                        })
-                        summary['types'][interaction_type] = summary['types'].get(interaction_type, 0) + 1
+        # Categorize pairwise interactions
+        for la in lig_atoms:
+            for ra in rec_atoms:
+                dist = float(np.linalg.norm(la['pos'] - ra['pos']))
+                if dist <= cutoff:
+                    res_label = f"{ra['res_name']}{ra['res_seq']}"
+                    pair_key = (res_label, la['atom_name'], ra['atom_name'])
+                    if pair_key in seen_pairs:
+                        continue
+                    seen_pairs.add(pair_key)
 
-                summary['total_interactions'] = len(interactions_found)
-                summary['interacting_residues'] = interactions_found
-        finally:
-            if os.path.exists(f_path):
-                os.remove(f_path)
+                    # Classify interaction type based on chemical elements and distance
+                    l_elem = la['elem']
+                    r_elem = ra['elem']
+
+                    if dist <= 3.5 and ((l_elem in ('O', 'N') and r_elem in ('O', 'N')) or (l_elem == 'F' and r_elem in ('O', 'N'))):
+                        itype = 'Hydrogen Bond'
+                    elif dist <= 4.2 and ((l_elem == 'N' and r_elem in ('O', 'P')) or (l_elem == 'P' and r_elem == 'N')):
+                        itype = 'Electrostatic'
+                    elif dist <= 4.5 and (la['is_aromatic'] and ra['is_aromatic']):
+                        itype = 'Pi-Stacking'
+                    elif dist <= 4.0 and (l_elem == 'C' and r_elem == 'C'):
+                        itype = 'Hydrophobic'
+                    else:
+                        itype = 'Van der Waals'
+
+                    interactions_found.append({
+                        'residue': res_label,
+                        'chain': ra['chain'],
+                        'type': itype,
+                        'distance': round(dist, 2),
+                        'rec_atom': ra['atom_name'],
+                        'lig_atom': la['atom_name']
+                    })
+                    summary['types'][itype] = summary['types'].get(itype, 0) + 1
+
+        # Sort contacts by closest distance
+        interactions_found.sort(key=lambda x: x['distance'])
+        summary['total_interactions'] = len(interactions_found)
+        summary['interacting_residues'] = interactions_found
+
     except Exception as e:
         summary['error'] = str(e)
 

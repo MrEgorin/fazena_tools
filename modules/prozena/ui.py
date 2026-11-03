@@ -13,18 +13,21 @@ from rdkit import Chem
 from modules.conplex_screener import run_conplex_screening
 from modules.admet import filter_compound_library, evaluate_admet
 from modules.input_parser import parse_ligand_text, parse_ligand_file, parse_sequence_input
-from modules.docking_engine import dock_top_candidates, analyze_interactions
+from modules.docking_engine import dock_top_candidates, analyze_interactions, calculate_grid_box
 from modules.visualization import (
     render_ligand_2d,
     get_base64_mol_image,
     render_complex_3d,
+    render_receptor_3d,
+    render_complex_2d,
     render_interaction_summary_ui
 )
 from modules.ui_components import (
     render_header,
     render_section_divider,
     render_footer,
-    render_success_alert
+    render_success_alert,
+    render_docking_parameter_controls
 )
 from modules.config import HARDWARE, DOCKING_CONFIG
 
@@ -52,6 +55,20 @@ def render_page():
             st.caption(f"Parsed Target Sequence: **{len(clean_protein_seq)} amino acids** ({prot_name})")
 
         protein_pdb_file = st.file_uploader("Upload 3D Protein Structure (.pdb / .pdbqt) for Docking", type=['pdb', 'pdbqt'])
+
+        default_protein_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tools", "AutoRevDock", "examples", "pro", "9MXC_A.pdb")
+        target_preview_content = None
+        if protein_pdb_file:
+            target_preview_content = protein_pdb_file.getvalue().decode('utf-8', errors='ignore')
+            st.caption(f"Loaded custom Protein: **{protein_pdb_file.name}**")
+        elif os.path.exists(default_protein_path):
+            with open(default_protein_path, 'r') as f:
+                target_preview_content = f.read()
+
+        if target_preview_content:
+            with st.expander("👁️ Target Protein 3D Architecture Preview", expanded=False):
+                st.caption("3D macromolecular view of target protein architecture:")
+                render_receptor_3d(target_preview_content, height=320)
 
     with col2:
         st.markdown(f"<h3 style='display: flex; align-items: center; gap: 10px;'><span style='color: var(--fz-accent);'>{ICON_BIND}</span> Chemical Library</h3>", unsafe_allow_html=True)
@@ -153,32 +170,58 @@ def render_page():
                 st.download_button("📥 Export Passed Filter Hits (.csv)", filtered_df.drop(columns=['Structure'], errors='ignore').to_csv(index=False).encode('utf-8'), "prozena_passed.csv", "text/csv", use_container_width=True)
 
             # ═════════════════════════════════════════════════════════════
-            # AUTOMATED TOP-5 DOCKING SECTION
+            # AUTOMATED TOP-5 DOCKING SECTION WITH FULL PARAMETER TUNING
             # ═════════════════════════════════════════════════════════════
             render_section_divider()
-            st.markdown(f"<h3 style='display: flex; align-items: center; gap: 10px;'><span style='color: var(--fz-accent);'>{ICON_DOCK}</span> Automated Top-5 AutoDock Vina Docking</h3>", unsafe_allow_html=True)
+            st.markdown(f"<h3 style='display: flex; align-items: center; gap: 10px;'><span style='color: var(--fz-accent);'>{ICON_DOCK}</span> Automated Top-5 AutoDock Vina Protein Docking</h3>", unsafe_allow_html=True)
             st.markdown("<p style='color: var(--fz-text-muted); font-size: 0.92rem;'>AutoDock Vina performs physics-based docking with full grid exploration and energetic pose ranking for the top hits.</p>", unsafe_allow_html=True)
 
+            default_protein_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "tools", "AutoRevDock", "examples", "pro", "9MXC_A.pdb")
             if protein_pdb_file:
                 target_pdb_content = protein_pdb_file.getvalue().decode('utf-8', errors='ignore')
+                st.info(f"Using uploaded Protein Structure: **{protein_pdb_file.name}**")
+            elif os.path.exists(default_protein_path):
+                with open(default_protein_path, 'r') as f:
+                    target_pdb_content = f.read()
+                st.info("ℹ️ Using reference 3D Protein Structure (`9MXC_A.pdb`) for automated docking. (You can also upload a custom .pdb above).")
             else:
                 target_pdb_content = None
                 st.warning("Please upload a 3D Protein Structure (.pdb) above to run AutoDock Vina docking.")
 
-            if target_pdb_content and st.button("⚡ Run AutoDock Vina on Top-5 Compounds", use_container_width=True):
-                top_5_candidates = filtered_df.head(5).to_dict(orient='records')
-                with st.spinner("Executing AutoDock Vina molecular docking for Top 5 candidates..."):
-                    dock_results = dock_top_candidates(
-                        receptor_pdb=target_pdb_content,
-                        candidates=top_5_candidates,
-                        top_n=5,
-                        is_rna=False
-                    )
-                    st.session_state['prozena_dock_results'] = dock_results
-                    render_success_alert("AutoDock Vina Docking Complete for Top 5 Hits!")
+            dock_params = None
+            if target_pdb_content:
+                default_box = calculate_grid_box(target_pdb_content)
+                dock_params = render_docking_parameter_controls(default_box, is_rna=False, key_prefix="prozena_dock")
+
+                col_btn, col_info = st.columns([1, 2])
+                with col_btn:
+                    run_dock_btn = st.button("⚡ Run AutoDock Vina on Top-5 Compounds", use_container_width=True)
+                with col_info:
+                    st.caption(f"Search Box Center: `({dock_params['grid_box']['center_x']}, {dock_params['grid_box']['center_y']}, {dock_params['grid_box']['center_z']})` | Box Size: `({dock_params['grid_box']['size_x']} × {dock_params['grid_box']['size_y']} × {dock_params['grid_box']['size_z']} Å)` | Exhaustiveness: `{dock_params['exhaustiveness']}` | Seed: `{dock_params['seed']}`")
+
+                if run_dock_btn:
+                    top_5_candidates = filtered_df.head(5).to_dict(orient='records')
+                    with st.spinner("Executing AutoDock Vina molecular docking for Top 5 candidates..."):
+                        dock_results = dock_top_candidates(
+                            receptor_pdb=target_pdb_content,
+                            candidates=top_5_candidates,
+                            top_n=5,
+                            grid_box=dock_params['grid_box'],
+                            exhaustiveness=dock_params['exhaustiveness'],
+                            n_poses=dock_params['n_poses'],
+                            energy_range=dock_params['energy_range'],
+                            seed=dock_params['seed'],
+                            cpu=dock_params['cpu'],
+                            sf_name=dock_params['sf_name'],
+                            is_rna=False
+                        )
+                        st.session_state['prozena_dock_results'] = dock_results
+                        st.session_state['prozena_dock_params'] = dock_params
+                        render_success_alert("AutoDock Vina Docking Complete for Top 5 Hits!")
 
             if 'prozena_dock_results' in st.session_state:
                 dock_res_list = st.session_state['prozena_dock_results']
+                saved_params = st.session_state.get('prozena_dock_params', dock_params or {})
                 st.markdown("#### 🎯 Docking Affinity Rankings")
                 
                 dock_summary = []
@@ -191,24 +234,30 @@ def render_page():
                     })
                 st.dataframe(pd.DataFrame(dock_summary), use_container_width=True)
 
-                st.markdown("#### 🔍 3D Complex & Interaction Inspector")
+                st.markdown("#### 🔍 3D Complex & 2D Interaction Inspector")
                 comp_names = [d.get('name') for d in dock_res_list if d.get('status') == 'Success']
                 if comp_names:
-                    selected_comp = st.selectbox("Select Pose to Inspect", comp_names)
+                    selected_comp = st.selectbox("Select Pose to Inspect in 3D & 2D", comp_names)
                     selected_data = next((d for d in dock_res_list if d.get('name') == selected_comp), None)
                     if selected_data and selected_data.get('complex_pdb'):
                         col_3d, col_2d = st.columns([3, 2])
                         with col_3d:
                             st.caption(f"Interactive 3D View: {selected_comp} in Target Protein")
-                            render_complex_3d(selected_data['complex_pdb'], height=450)
+                            show_box = saved_params.get('show_box', True)
+                            render_complex_3d(
+                                selected_data['complex_pdb'],
+                                height=480,
+                                grid_box=saved_params.get('grid_box'),
+                                show_box=show_box
+                            )
                         with col_2d:
-                            st.caption("2D Binding Residue Interactions (ProLIF)")
+                            st.caption("2D Binding Residue Interactions & Topology")
                             inter_summary = analyze_interactions(selected_data['complex_pdb'])
-                            render_interaction_summary_ui(inter_summary)
+                            render_interaction_summary_ui(inter_summary, complex_pdb_str=selected_data['complex_pdb'])
                             st.download_button(
                                 "📥 Download Complex PDB",
                                 selected_data['complex_pdb'],
-                                f"{selected_comp}_complex.pdb",
+                                f"{selected_comp}_protein_complex.pdb",
                                 "chemical/x-pdb",
                                 use_container_width=True
                             )

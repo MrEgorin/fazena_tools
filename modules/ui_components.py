@@ -11,27 +11,29 @@ def inject_custom_css():
     /* ── Google Fonts ── */
     @import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    /* ── Design Tokens ── */
+    /* ── Design Tokens (fazena.org Blue-Green Theme) ── */
     :root {
-        --fz-bg-primary:    #1D1D1D;
-        --fz-bg-secondary:  #242424;
-        --fz-bg-card:       #282828;
-        --fz-bg-card-hover: #2F2F2F;
-        --fz-accent:        #DA752D;
-        --fz-accent-dim:    #c4672a;
-        --fz-accent-glow:   rgba(218, 117, 45, 0.25);
-        --fz-accent-glow-s: rgba(218, 117, 45, 0.10);
-        --fz-text:          #FEFEFE;
-        --fz-text-muted:    rgba(254, 254, 254, 0.60);
-        --fz-text-dim:      rgba(254, 254, 254, 0.40);
-        --fz-border:        rgba(255, 255, 255, 0.07);
-        --fz-border-hover:  rgba(255, 255, 255, 0.13);
+        --fz-bg-primary:    #0B1329;
+        --fz-bg-secondary:  #0F172A;
+        --fz-bg-card:       #1E293B;
+        --fz-bg-card-hover: #24344D;
+        --fz-accent:        #0ea5e9;
+        --fz-accent-emerald:#10b981;
+        --fz-accent-dim:    #0284c7;
+        --fz-accent-glow:   rgba(14, 165, 233, 0.28);
+        --fz-accent-glow-s: rgba(16, 185, 129, 0.18);
+        --fz-text:          #F8FAFC;
+        --fz-text-muted:    rgba(248, 250, 252, 0.70);
+        --fz-text-dim:      rgba(248, 250, 252, 0.45);
+        --fz-border:        rgba(14, 165, 233, 0.18);
+        --fz-border-hover:  rgba(16, 185, 129, 0.35);
         --fz-radius-card:   16px;
-        --fz-radius-btn:    6px;
+        --fz-radius-btn:    8px;
         --fz-radius-input:  8px;
         --fz-font-heading:  'Audiowide', sans-serif;
         --fz-font-body:     'Inter', sans-serif;
         --fz-font-mono:     'JetBrains Mono', monospace;
+        --fz-gradient:      linear-gradient(135deg, #10b981 0%, #0ea5e9 100%);
     }
 
     /* ── Text Selection ── */
@@ -207,29 +209,30 @@ def inject_custom_css():
     }
 
     /* ═══════════════════════════════════
-       BUTTONS — Orange Accent
+       BUTTONS — Fazena Blue-Green
        ═══════════════════════════════════ */
     .stButton > button {
-        background-color: transparent !important;
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(14, 165, 233, 0.15) 100%) !important;
         color: var(--fz-text) !important;
         font-family: var(--fz-font-heading) !important;
-        border: 1px solid var(--fz-accent) !important;
+        border: 1px solid var(--fz-accent-emerald) !important;
         border-radius: var(--fz-radius-btn) !important;
         padding: 0.65rem 2rem !important;
-        transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         text-transform: uppercase;
         letter-spacing: 2px;
-        font-size: 0.8rem !important;
+        font-size: 0.82rem !important;
         position: relative;
         overflow: hidden;
+        box-shadow: 0 4px 15px rgba(16, 185, 129, 0.15) !important;
     }
 
     .stButton > button:hover {
-        background-color: var(--fz-accent) !important;
-        color: #000000 !important;
-        box-shadow: 0 2px 12px var(--fz-accent-glow), inset 0 0 25px rgba(234, 148, 20, 0.3) !important;
-        transform: translateY(-1px);
-        border-color: var(--fz-accent) !important;
+        background: linear-gradient(135deg, #10b981 0%, #0ea5e9 100%) !important;
+        color: #ffffff !important;
+        box-shadow: 0 6px 20px rgba(14, 165, 233, 0.35), inset 0 0 15px rgba(255, 255, 255, 0.2) !important;
+        transform: translateY(-2px);
+        border-color: #0ea5e9 !important;
     }
 
     .stButton > button:active {
@@ -238,23 +241,24 @@ def inject_custom_css():
 
     /* Download Buttons */
     .stDownloadButton > button {
-        background-color: transparent !important;
+        background: rgba(14, 165, 233, 0.1) !important;
         color: var(--fz-text) !important;
         font-family: var(--fz-font-heading) !important;
-        border: 1px solid rgba(234, 116, 20, 0.6) !important;
+        border: 1px solid rgba(14, 165, 233, 0.5) !important;
         border-radius: var(--fz-radius-btn) !important;
         padding: 0.65rem 2rem !important;
-        transition: all 0.35s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+        transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
         text-transform: uppercase;
         letter-spacing: 1.5px;
-        font-size: 0.75rem !important;
+        font-size: 0.78rem !important;
     }
 
     .stDownloadButton > button:hover {
-        background-color: var(--fz-accent) !important;
-        color: #000000 !important;
-        border-color: var(--fz-accent) !important;
-        box-shadow: 0 2px 12px var(--fz-accent-glow) !important;
+        background: linear-gradient(135deg, #0ea5e9 0%, #10b981 100%) !important;
+        color: #ffffff !important;
+        border-color: #10b981 !important;
+        box-shadow: 0 4px 18px rgba(14, 165, 233, 0.3) !important;
+        transform: translateY(-2px);
     }
 
     /* ═══════════════════════════════════
@@ -818,13 +822,96 @@ def render_capability_card(icon, title, description):
 
 
 def render_footer():
-    """Render the Fazena footer branding with creator attribution."""
+    """Render the Fazena footer branding with creator, team, and affiliation attribution."""
     st.markdown("""
-    <div class="fazena-footer-brand">
-        Developed by <a href="https://www.fazena.org" target="_blank">FAZENA</a> &bull;
-        <span style="opacity: 0.85; font-size: 0.72rem; letter-spacing: 1px;">Yehor Franchuk, MrEgorin, FAZENA</span>
+    <div style='margin-top: 3.5rem; padding-top: 2rem; border-top: 1px solid var(--fz-border); text-align: center;'>
+        <div style='display: inline-flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px; margin-bottom: 0.8rem;'>
+            <a href="https://www.fazena.org" target="_blank" style="text-decoration: none;">
+                <span style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.35); color: #10b981; padding: 5px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                    🧬 FAZENA Team
+                </span>
+            </a>
+            <span style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.35); color: #38bdf8; padding: 5px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
+                👨‍💻 Yehor Franchuk (MrEgorin)
+            </span>
+            <span style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); color: #c084fc; padding: 5px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
+                🏛️ Institute of Cell Biology NASU
+            </span>
+        </div>
+        <div style="color: var(--fz-text-dim); font-size: 0.76rem; letter-spacing: 0.5px; line-height: 1.6;">
+            Next-Generation Modular Drug Discovery Foundry &bull; <a href="https://www.fazena.org" target="_blank" style="color: var(--fz-accent); text-decoration: none;">fazena.org</a><br>
+            All AI inferences and physics-based AutoDock Vina calculations execute strictly on local models and trained weights.
+        </div>
     </div>
     """, unsafe_allow_html=True)
+
+
+def render_docking_parameter_controls(default_grid_box: dict, is_rna: bool = False, key_prefix: str = "dock") -> dict:
+    """
+    Renders flexible docking parameter controls with an intuitive interface.
+    Allows configuring box center (x, y, z), box dimensions (size_x, size_y, size_z),
+    search exhaustiveness, number of poses, energy range, random seed, CPU threads, and scoring function.
+    """
+    with st.expander("⚙️ AutoDock Vina Engine & Grid Box Parameters", expanded=False):
+        st.markdown(
+            f"<p style='color: var(--fz-text-muted); font-size: 0.88rem; margin-bottom: 1rem;'>"
+            f"Configure AutoDock Vina search box coordinates and physics simulation settings for <b>{'RNA Target' if is_rna else 'Protein Target'}</b>."
+            f"</p>",
+            unsafe_allow_html=True
+        )
+
+        col_c1, col_c2, col_c3 = st.columns(3)
+        with col_c1:
+            center_x = st.number_input("Center X (Å)", value=float(default_grid_box.get('center_x', 0.0)), step=1.0, format="%.2f", key=f"{key_prefix}_cx")
+        with col_c2:
+            center_y = st.number_input("Center Y (Å)", value=float(default_grid_box.get('center_y', 0.0)), step=1.0, format="%.2f", key=f"{key_prefix}_cy")
+        with col_c3:
+            center_z = st.number_input("Center Z (Å)", value=float(default_grid_box.get('center_z', 0.0)), step=1.0, format="%.2f", key=f"{key_prefix}_cz")
+
+        col_s1, col_s2, col_s3 = st.columns(3)
+        with col_s1:
+            size_x = st.slider("Size X (Å)", min_value=10.0, max_value=80.0, value=float(default_grid_box.get('size_x', 24.0)), step=1.0, key=f"{key_prefix}_sx")
+        with col_s2:
+            size_y = st.slider("Size Y (Å)", min_value=10.0, max_value=80.0, value=float(default_grid_box.get('size_y', 24.0)), step=1.0, key=f"{key_prefix}_sy")
+        with col_s3:
+            size_z = st.slider("Size Z (Å)", min_value=10.0, max_value=80.0, value=float(default_grid_box.get('size_z', 24.0)), step=1.0, key=f"{key_prefix}_sz")
+
+        st.markdown("<hr style='border: none; border-top: 1px solid var(--fz-border); margin: 0.8rem 0;'>", unsafe_allow_html=True)
+
+        col_p1, col_p2, col_p3 = st.columns(3)
+        with col_p1:
+            exhaustiveness = st.slider("Exhaustiveness", min_value=1, max_value=32, value=8, step=1, help="Higher values increase thoroughness of Monte Carlo sampling (8 is standard, 16-32 for deep search).", key=f"{key_prefix}_ex")
+            n_poses = st.slider("Number of Poses (Modes)", min_value=1, max_value=20, value=5, step=1, key=f"{key_prefix}_nposes")
+        with col_p2:
+            energy_range = st.number_input("Energy Range (kcal/mol)", min_value=1.0, max_value=10.0, value=3.0, step=0.5, help="Maximum energy difference between best and worst pose.", key=f"{key_prefix}_er")
+            seed = st.number_input("Random Seed (0 = Random)", min_value=0, max_value=999999, value=42, step=1, help="Fixed seed ensures exact numerical reproducibility.", key=f"{key_prefix}_seed")
+        with col_p3:
+            import os
+            max_cpus = os.cpu_count() or 4
+            cpu_threads = st.slider("CPU Threads", min_value=1, max_value=min(max_cpus, 16), value=min(max_cpus, 8), step=1, key=f"{key_prefix}_cpu")
+            sf_name = st.selectbox("Scoring Function", ["vina", "vinardo"], index=0, key=f"{key_prefix}_sf")
+
+        show_box_wireframe = st.checkbox("Show 3D Grid Search Box in Viewer", value=True, key=f"{key_prefix}_showbox")
+
+    grid_box = {
+        'center_x': center_x,
+        'center_y': center_y,
+        'center_z': center_z,
+        'size_x': size_x,
+        'size_y': size_y,
+        'size_z': size_z
+    }
+
+    return {
+        'grid_box': grid_box,
+        'exhaustiveness': exhaustiveness,
+        'n_poses': n_poses,
+        'energy_range': energy_range,
+        'seed': seed,
+        'cpu': cpu_threads,
+        'sf_name': sf_name,
+        'show_box': show_box_wireframe
+    }
 
 
 def render_success_alert(message):
