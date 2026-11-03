@@ -71,7 +71,7 @@ def render_page():
                 target_preview_content = f.read()
 
         if target_preview_content:
-            with st.expander("👁️ Target RNA 3D Architecture Preview", expanded=False):
+            with st.expander("Target RNA 3D Architecture Preview", expanded=False):
                 st.caption("3D macromolecular view of target RNA architecture:")
                 render_receptor_3d(target_preview_content, height=320)
 
@@ -104,7 +104,7 @@ def render_page():
 
     # ADMET & Safety Filters
     st.markdown("<div class='fazena-card'>", unsafe_allow_html=True)
-    with st.expander("🛡️ Advanced ADMET & Safety Filters", expanded=True):
+    with st.expander("Advanced ADMET & Safety Filters", expanded=True):
         st.markdown("<p style='color: var(--fz-text-muted); font-size: 0.9rem;'>Compounds violating Lipinski Rule of 5 or containing reactive toxicophores will be flagged or excluded.</p>", unsafe_allow_html=True)
         col_f1, col_f2, col_f3 = st.columns(3)
         with col_f1:
@@ -121,7 +121,7 @@ def render_page():
 
     render_section_divider()
 
-    if st.button("🚀 Initialize RNA Virtual Screening", use_container_width=True):
+    if st.button("Execute RNA Virtual Screening", use_container_width=True):
         if not rna_seq:
             st.error("Please provide a target RNA sequence."); return
         if not parsed_ligands:
@@ -180,9 +180,9 @@ def render_page():
             render_section_divider()
             col_ex1, col_ex2 = st.columns(2)
             with col_ex1:
-                st.download_button("📥 Export ALL Results (.csv)", results_df.to_csv(index=False).encode('utf-8'), "rna_screen_all.csv", "text/csv", use_container_width=True)
+                st.download_button("Export All Results (.csv)", results_df.to_csv(index=False).encode('utf-8'), "rna_screen_all.csv", "text/csv", use_container_width=True)
             with col_ex2:
-                st.download_button("📥 Export Passed Filter Hits (.csv)", filtered_df.drop(columns=['Structure'], errors='ignore').to_csv(index=False).encode('utf-8'), "rna_screen_passed.csv", "text/csv", use_container_width=True)
+                st.download_button("Export Passed Filter Hits (.csv)", filtered_df.drop(columns=['Structure'], errors='ignore').to_csv(index=False).encode('utf-8'), "rna_screen_passed.csv", "text/csv", use_container_width=True)
 
             # ═════════════════════════════════════════════════════════════
             # AUTOMATED TOP-5 DOCKING SECTION WITH FULL PARAMETER TUNING
@@ -198,7 +198,7 @@ def render_page():
             elif os.path.exists(default_rna_model_path):
                 with open(default_rna_model_path, 'r') as f:
                     target_pdb_content = f.read()
-                st.info("ℹ️ Using reference 3D RNA Target (`rna_model.pdb`) for automated docking. (You can also upload a custom .pdb above).")
+                st.info("Using reference 3D RNA Target (`rna_model.pdb`) for automated docking. (You can also upload a custom .pdb above).")
             else:
                 target_pdb_content = None
                 st.warning("Please upload a 3D RNA Structure (.pdb) above to run full AutoDock Vina docking.")
@@ -206,13 +206,13 @@ def render_page():
             dock_params = None
             if target_pdb_content:
                 default_box = calculate_grid_box(target_pdb_content)
-                dock_params = render_docking_parameter_controls(default_box, is_rna=True, key_prefix="rna_dock")
+                dock_params = render_docking_parameter_controls(default_box, is_rna=True, key_prefix="rna_dock", allow_gpu=True)
 
                 col_btn, col_info = st.columns([1, 2])
                 with col_btn:
-                    run_dock_btn = st.button("⚡ Run AutoDock Vina on Top-5 Compounds", use_container_width=True)
+                    run_dock_btn = st.button("Run AutoDock Vina on Top-5 Compounds", use_container_width=True)
                 with col_info:
-                    st.caption(f"Search Box Center: `({dock_params['grid_box']['center_x']}, {dock_params['grid_box']['center_y']}, {dock_params['grid_box']['center_z']})` | Box Size: `({dock_params['grid_box']['size_x']} × {dock_params['grid_box']['size_y']} × {dock_params['grid_box']['size_z']} Å)` | Exhaustiveness: `{dock_params['exhaustiveness']}` | Seed: `{dock_params['seed']}`")
+                    st.caption(f"Search Box Center: `({dock_params['grid_box']['center_x']}, {dock_params['grid_box']['center_y']}, {dock_params['grid_box']['center_z']})` | Box Size: `({dock_params['grid_box']['size_x']} × {dock_params['grid_box']['size_y']} × {dock_params['grid_box']['size_z']} Å)` | Engine: `{dock_params.get('engine_mode', 'vina').upper()}`")
 
                 if run_dock_btn:
                     top_5_candidates = filtered_df.head(5).to_dict(orient='records')
@@ -228,7 +228,10 @@ def render_page():
                             seed=dock_params['seed'],
                             cpu=dock_params['cpu'],
                             sf_name=dock_params['sf_name'],
-                            is_rna=True
+                            is_rna=True,
+                            engine_mode=dock_params.get('engine_mode', 'vina'),
+                            gpu_threads=dock_params.get('gpu_threads', 8000),
+                            vina_gpu_bin=dock_params.get('vina_gpu_bin')
                         )
                         st.session_state['rna_dock_results'] = dock_results
                         st.session_state['rna_dock_params'] = dock_params
@@ -237,7 +240,7 @@ def render_page():
             if 'rna_dock_results' in st.session_state:
                 dock_res_list = st.session_state['rna_dock_results']
                 saved_params = st.session_state.get('rna_dock_params', dock_params or {})
-                st.markdown("#### 🎯 Docking Affinity Rankings")
+                st.markdown("#### Docking Affinity Rankings")
                 
                 dock_summary = []
                 for d in dock_res_list:
@@ -245,12 +248,13 @@ def render_page():
                         'Compound': d.get('name'),
                         'Affinity (kcal/mol)': d.get('affinity'),
                         'Estimated Ki': d.get('ki_estimated'),
+                        'Engine': d.get('engine_used', 'AutoDock Vina'),
                         'Status': d.get('status')
                     })
                 st.dataframe(pd.DataFrame(dock_summary), use_container_width=True)
 
                 # Interactive 3D Viewer & 2D Contacts for selected pose
-                st.markdown("#### 🔍 3D Complex & 2D Interaction Inspector")
+                st.markdown("#### 3D Complex & 2D Interaction Inspector")
                 comp_names = [d.get('name') for d in dock_res_list if d.get('status') == 'Success']
                 if comp_names:
                     selected_comp = st.selectbox("Select Docked Pose to Inspect in 3D & 2D", comp_names)
@@ -271,7 +275,7 @@ def render_page():
                             inter_summary = analyze_interactions(selected_data['complex_pdb'])
                             render_interaction_summary_ui(inter_summary, complex_pdb_str=selected_data['complex_pdb'])
                             st.download_button(
-                                "📥 Download Complex PDB",
+                                "Download Complex PDB",
                                 selected_data['complex_pdb'],
                                 f"{selected_comp}_rna_complex.pdb",
                                 "chemical/x-pdb",

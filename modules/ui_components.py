@@ -846,19 +846,72 @@ def render_footer():
     """, unsafe_allow_html=True)
 
 
-def render_docking_parameter_controls(default_grid_box: dict, is_rna: bool = False, key_prefix: str = "dock") -> dict:
+def render_docking_parameter_controls(default_grid_box: dict, is_rna: bool = False, key_prefix: str = "dock", allow_gpu: bool = True) -> dict:
     """
     Renders flexible docking parameter controls with an intuitive interface.
     Allows configuring box center (x, y, z), box dimensions (size_x, size_y, size_z),
-    search exhaustiveness, number of poses, energy range, random seed, CPU threads, and scoring function.
+    docking engine (AutoDock Vina CPU vs Vina-GPU CUDA acceleration),
+    search exhaustiveness, number of poses, energy range, random seed, and scoring function.
     """
-    with st.expander("⚙️ AutoDock Vina Engine & Grid Box Parameters", expanded=False):
+    from modules.config import HARDWARE
+
+    with st.expander("AutoDock Vina Engine & Search Box Configuration", expanded=False):
         st.markdown(
             f"<p style='color: var(--fz-text-muted); font-size: 0.88rem; margin-bottom: 1rem;'>"
-            f"Configure AutoDock Vina search box coordinates and physics simulation settings for <b>{'RNA Target' if is_rna else 'Protein Target'}</b>."
+            f"Configure search box coordinates and physics simulation settings for <b>{'RNA Target' if is_rna else 'Protein Target'}</b>."
             f"</p>",
             unsafe_allow_html=True
         )
+
+        # Hardware Engine Selection
+        has_cuda = HARDWARE.get('has_cuda', False)
+        cuda_name = HARDWARE.get('cuda_device_name', 'NVIDIA GPU')
+        vram_gb = HARDWARE.get('gpu_vram_gb', 0.0)
+
+        engine_mode = "vina"
+        gpu_threads = 8000
+        vina_gpu_bin = ""
+
+        if allow_gpu and has_cuda:
+            st.markdown(
+                f"<div style='background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); "
+                f"border-radius: 8px; padding: 6px 12px; margin-bottom: 12px; font-size: 0.82rem; color: #34d399; display: flex; align-items: center; justify-content: space-between;'>"
+                f"<span>Hardware Detected: <b>{cuda_name}</b> ({vram_gb} GB VRAM)</span>"
+                f"<span style='background: rgba(16, 185, 129, 0.2); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600;'>CUDA ACTIVE</span>"
+                f"</div>",
+                unsafe_allow_html=True
+            )
+            engine_choice = st.radio(
+                "Docking Acceleration Engine",
+                [
+                    "AutoDock Vina-GPU (NVIDIA CUDA Acceleration)",
+                    "AutoDock Vina (CPU Multithreading)"
+                ],
+                index=0,
+                key=f"{key_prefix}_engine_choice"
+            )
+            if "Vina-GPU" in engine_choice:
+                engine_mode = "vina_gpu"
+                col_g1, col_g2 = st.columns([1, 1])
+                with col_g1:
+                    gpu_threads = st.slider(
+                        "GPU Workgroup Threads (--thread)",
+                        min_value=1000,
+                        max_value=16000,
+                        value=8000,
+                        step=1000,
+                        help="Number of GPU threads allocated for parallel Monte Carlo search iterations on RTX 5070 Ti.",
+                        key=f"{key_prefix}_gthreads"
+                    )
+                with col_g2:
+                    vina_gpu_bin = st.text_input(
+                        "Custom Vina-GPU Binary (Auto-detected if empty)",
+                        value="",
+                        placeholder="e.g. /usr/local/bin/AutoDock-Vina-GPU-2-1",
+                        key=f"{key_prefix}_gbin"
+                    )
+            else:
+                engine_mode = "vina"
 
         col_c1, col_c2, col_c3 = st.columns(3)
         with col_c1:
@@ -910,6 +963,9 @@ def render_docking_parameter_controls(default_grid_box: dict, is_rna: bool = Fal
         'seed': seed,
         'cpu': cpu_threads,
         'sf_name': sf_name,
+        'engine_mode': engine_mode,
+        'gpu_threads': gpu_threads,
+        'vina_gpu_bin': vina_gpu_bin,
         'show_box': show_box_wireframe
     }
 

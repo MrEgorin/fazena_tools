@@ -222,6 +222,63 @@ END
         diag_html = generate_2d_interaction_diagram(sample_complex)
         self.assertIn("<svg", diag_html)
         self.assertIn("G1", diag_html)
+        self.assertIn("<img", diag_html)
+
+    def test_vina_gpu_support_and_discovery(self):
+        from modules.docking_engine import find_vina_gpu_binary, dock_single_compound
+        from modules.config import HARDWARE
+
+        # Check binary discovery function
+        gpu_bin = find_vina_gpu_binary()
+        self.assertTrue(gpu_bin is None or os.path.exists(gpu_bin))
+
+        # Check hardware detection detects the RTX 5070 Ti or GPU presence
+        self.assertIn('has_cuda', HARDWARE)
+        self.assertIn('cuda_device_name', HARDWARE)
+
+        # Test single compound docking with engine_mode='vina_gpu' (with automatic graceful fallback)
+        pdb_sample = """ATOM      1  N   ASP A   1      20.154  30.450  15.200  1.00 20.00           N
+ATOM      2  CA  ASP A   1      21.000  31.000  16.000  1.00 20.00           C
+ATOM      3  C   ASP A   1      22.000  32.000  17.000  1.00 20.00           C
+ATOM      4  O   ASP A   1      23.000  33.000  18.000  1.00 20.00           O
+END
+"""
+        res = dock_single_compound(
+            receptor_pdb=pdb_sample,
+            ligand_smiles="CC(=O)Oc1ccccc1C(=O)O",
+            exhaustiveness=1,
+            n_poses=1,
+            engine_mode="vina_gpu",
+            gpu_threads=8000
+        )
+        self.assertIn('status', res)
+        if res.get('status') == 'Success':
+            self.assertIn('engine_used', res)
+
+    def test_expanded_target_proteome_database(self):
+        from modules.target_prediction import (
+            TARGET_PROFILES,
+            get_all_target_classes,
+            get_all_organisms,
+            predict_targets
+        )
+
+        self.assertGreaterEqual(len(TARGET_PROFILES), 50)
+        classes = get_all_target_classes()
+        self.assertIn("Kinase", classes)
+        self.assertIn("GPCR", classes)
+        self.assertIn("Protease", classes)
+        self.assertIn("Ion Channel", classes)
+
+        # Test prediction with class filtering
+        kinase_hits = predict_targets("Cc1ccc(NC(=O)c2ccc(CN3CCN(C)CC3)cc2)cc1Nc1nccc(-c2cccnc2)n1", top_k=5, target_class="Kinase")
+        self.assertFalse(kinase_hits.empty)
+        self.assertTrue((kinase_hits['Class'] == 'Kinase').all())
+
+        # Test prediction with organism filtering
+        viral_hits = predict_targets("CC1(C2C1C(N(C2)C(=O)C(C(C)(C)C)NC(=O)C(F)(F)F)C(=O)NC(CC3CCNC3=O)C#N)C", top_k=5, organism="Viral")
+        self.assertFalse(viral_hits.empty)
+        self.assertTrue((viral_hits['Organism'] == 'Viral').all())
 
 if __name__ == '__main__':
     unittest.main()

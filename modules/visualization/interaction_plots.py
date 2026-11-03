@@ -22,37 +22,68 @@ from rdkit import Chem
 from rdkit.Chem import Draw, AllChem
 from rdkit.Chem.Draw import rdMolDraw2D
 
+import re
+
 try:
     from modules.docking_engine import analyze_interactions
 except ImportError:
     analyze_interactions = None
 
 
-def render_ligand_2d(smiles: str, width: int = 260, height: int = 260):
+def _mol_to_clean_svg_b64(mol: Chem.Mol, width: int = 280, height: int = 240) -> str:
+    """Renders an RDKit Mol to a base64 encoded SVG data URI with clean XML and high contrast."""
+    try:
+        drawer = rdMolDraw2D.MolDraw2DSVG(width, height)
+        opts = drawer.drawOptions()
+        opts.clearBackground = True
+        opts.setBackgroundColour((1.0, 1.0, 1.0, 1.0))
+        opts.bondLineWidth = 2
+        drawer.DrawMolecule(mol)
+        drawer.FinishDrawing()
+        svg_raw = drawer.GetDrawingText()
+        svg_clean = re.sub(r'<\?xml[^>]*\?>', '', svg_raw).strip()
+        b64 = base64.b64encode(svg_clean.encode('utf-8')).decode('ascii')
+        return f"data:image/svg+xml;base64,{b64}"
+    except Exception:
+        return ""
+
+
+def render_ligand_2d(smiles: str, width: int = 260, height: int = 240):
     """
-    Renders a 2D image of a ligand given its SMILES string within a Streamlit app.
-    Styled to match the Fazena dark blue-green design language.
+    Renders a crisp 2D chemical depiction of a ligand given its SMILES string.
+    Uses base64 data URI image embedding inside the Fazena dark blue-green card,
+    preventing Streamlit markdown DOM sanitization from stripping raw SVG elements.
     """
     try:
-        mol = Chem.MolFromSmiles(smiles)
-        if mol:
-            drawer = rdMolDraw2D.MolDraw2DSVG(width, height)
-            opts = drawer.drawOptions()
-            opts.clearBackground = False
-            drawer.DrawMolecule(mol)
-            drawer.FinishDrawing()
-            svg_str = drawer.GetDrawingText()
+        if not smiles or not smiles.strip():
+            st.caption("No ligand SMILES provided.")
+            return
 
+        mol = Chem.MolFromSmiles(smiles.strip())
+        if not mol:
+            st.error(f"Invalid SMILES string: {smiles}")
+            return
+
+        AllChem.Compute2DCoords(mol)
+        data_uri = _mol_to_clean_svg_b64(mol, width=width, height=height)
+
+        # Fallback to PNG if SVG data URI generation failed
+        if not data_uri:
+            data_uri = get_base64_mol_image(smiles, size=(width, height))
+
+        if data_uri:
             st.markdown(
                 f"<div style='text-align: center; background: #1E293B; "
-                f"border: 1px solid rgba(14, 165, 233, 0.25); border-radius: 14px; "
-                f"padding: 1rem; display: inline-block; box-shadow: 0 4px 14px rgba(0,0,0,0.25);'>"
-                f"{svg_str}"
+                f"border: 1px solid rgba(14, 165, 233, 0.25); border-radius: 12px; "
+                f"padding: 12px; display: inline-block; box-shadow: 0 4px 14px rgba(0,0,0,0.25); max-width: 100%;'>"
+                f"<div style='background: #FFFFFF; border-radius: 8px; padding: 8px; display: inline-block;'>"
+                f"<img src='{data_uri}' alt='2D Molecule' style='width: {width}px; max-width: 100%; height: auto; display: block;'/>"
+                f"</div>"
                 f"</div>",
                 unsafe_allow_html=True
             )
         else:
-            st.error(f"Invalid SMILES string: {smiles}")
+            st.warning("Could not generate 2D image for molecule.")
     except Exception as e:
         st.error(f"Failed to render ligand: {e}")
 
@@ -109,11 +140,13 @@ def render_complex_3d(
     grid_box: Optional[Dict[str, float]] = None,
     show_box: bool = False,
     receptor_style: str = "cartoon",
-    ligand_style: str = "stick"
+    ligand_style: str = "stick",
+    is_receptor_only: bool = False
 ):
     """
     Renders an interactive 3D molecular viewer for macromolecule or complex PDB structures using 3Dmol.js.
     Robustly handles both RNA and protein polymers, applies high-contrast styling for ligands,
+    safely checks selection counts before zooming to prevent camera drop-out bugs,
     and optionally renders the 3D grid bounding box wireframe.
     """
     if not pdb_str or not pdb_str.strip():
@@ -144,6 +177,7 @@ def render_complex_3d(
         """
 
     div_id = f"viewer_3d_{abs(hash(pdb_str[:120])) % 1000000}"
+    rec_only_js = "true" if is_receptor_only else "false"
 
     html_code = f"""
     <!DOCTYPE html>
@@ -154,12 +188,19 @@ def render_complex_3d(
       <style>
         body, html {{ margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: #0B1329; }}
         #{div_id} {{ width: 100%; height: {height}px; position: relative; border-radius: 12px; }}
-        .badge-ctrl {{ position: absolute; bottom: 8px; left: 8px; z-index: 10; font-family: sans-serif; font-size: 11px; background: rgba(15, 23, 42, 0.75); color: #94A3B8; padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(14,165,233,0.3); }}
+        .badge-ctrl {{ position: absolute; bottom: 8px; left: 8px; z-index: 10; font-family: sans-serif; font-size: 11px; background: rgba(15, 23, 42, 0.85); color: #94A3B8; padding: 4px 10px; border-radius: 6px; border: 1px solid rgba(14,165,233,0.3); font-weight: 600; letter-spacing: 0.5px; }}
+        .action-bar {{ position: absolute; top: 8px; right: 8px; z-index: 10; display: flex; gap: 6px; }}
+        .btn-act {{ font-family: sans-serif; font-size: 11px; font-weight: 600; background: rgba(15, 23, 42, 0.85); color: #38BDF8; border: 1px solid rgba(14,165,233,0.35); padding: 3px 8px; border-radius: 5px; cursor: pointer; transition: all 0.2s; }}
+        .btn-act:hover {{ background: #0ea5e9; color: #ffffff; border-color: #0ea5e9; }}
       </style>
     </head>
     <body>
       <div id="{div_id}">
-        <div class="badge-ctrl">🧬 FAZENA 3D Interactive View</div>
+        <div class="badge-ctrl">FAZENA 3D Interactive View</div>
+        <div class="action-bar">
+          <button class="btn-act" onclick="window._resetCam_{div_id}()">Center View</button>
+          <button class="btn-act" onclick="window._toggleSpin_{div_id}()">Spin</button>
+        </div>
       </div>
       <script>
         (function() {{
@@ -170,39 +211,55 @@ def render_complex_3d(
           var pdbData = `{escaped_pdb}`;
           viewer.addModel(pdbData, "pdb");
 
-          // Polymer receptor: cartoon styling
+          // 1. Polymer receptor: cartoon styling + subtle sticks
           viewer.setStyle({{ hetflag: false }}, {{
               cartoon: {{ color: 'spectrum', opacity: 0.92 }},
-              stick: {{ radius: 0.12, opacity: 0.40 }}
+              stick: {{ radius: 0.12, opacity: 0.35 }}
           }});
 
-          // Ligand styling: vibrant emerald/cyan sticks with element spheres
+          // 2. Nucleic acids (RNA/DNA): cartoon ribbon + sticks for bases to ensure visibility on all formats
+          viewer.setStyle({{ nucleic: true }}, {{
+              cartoon: {{ color: '#0ea5e9', opacity: 0.90 }},
+              stick: {{ radius: 0.16, colorscheme: 'cyanCarbon' }}
+          }});
+
+          // 3. Ligand styling: high-contrast emerald sticks + atomic spheres
           viewer.setStyle({{ hetflag: true }}, {{
               stick: {{ colorscheme: 'greenCarbon', radius: 0.28 }},
               sphere: {{ scale: 0.24, opacity: 0.85 }}
           }});
-          viewer.setStyle({{ resname: ['UNL', 'LIG', 'MOL', 'DRG'] }}, {{
+          viewer.setStyle({{ resname: ['UNL', 'LIG', 'MOL', 'DRG', 'UNK'] }}, {{
               stick: {{ colorscheme: 'greenCarbon', radius: 0.28 }},
               sphere: {{ scale: 0.24, opacity: 0.85 }}
           }});
 
-          // Nucleic base rings subtle sticks for RNA/DNA
-          viewer.setStyle({{ nucleic: true }}, {{
-              cartoon: {{ color: '#0ea5e9', opacity: 0.88 }},
-              stick: {{ radius: 0.14, colorscheme: 'cyanCarbon' }}
-          }});
-
           {box_js}
 
-          // Camera zoom
-          var hasLig = pdbData.indexOf("HETATM") !== -1 || pdbData.indexOf("UNL") !== -1;
-          if (hasLig) {{
-              viewer.zoomTo({{ resname: ['UNL', 'LIG', 'MOL', 'DRG'] }});
-          }} else {{
+          // Safe Camera Zoom: verify atoms exist before zooming to selection
+          var isReceptorOnly = {rec_only_js};
+          function doZoom() {{
+              if (!isReceptorOnly) {{
+                  var ligAtoms = viewer.selectedAtoms({{ resname: ['UNL', 'LIG', 'MOL', 'DRG', 'UNK'] }});
+                  if (ligAtoms && ligAtoms.length > 0) {{
+                      viewer.zoomTo({{ resname: ['UNL', 'LIG', 'MOL', 'DRG', 'UNK'] }});
+                      return;
+                  }}
+              }}
               viewer.zoomTo();
           }}
-
+          doZoom();
           viewer.render();
+
+          // Controls
+          var spinning = false;
+          window._resetCam_{div_id} = function() {{
+              viewer.zoomTo();
+              viewer.render();
+          }};
+          window._toggleSpin_{div_id} = function() {{
+              spinning = !spinning;
+              viewer.spin(spinning ? "y" : false, 1.0);
+          }};
         }})();
       </script>
     </body>
@@ -220,7 +277,7 @@ def render_receptor_3d(
     """
     Renders a standalone macromolecule (protein or RNA) with optional grid box wireframe.
     """
-    render_complex_3d(pdb_str, height=height, grid_box=grid_box, show_box=show_box)
+    render_complex_3d(pdb_str, height=height, grid_box=grid_box, show_box=show_box, is_receptor_only=True)
 
 
 # ═════════════════════════════════════════════════════════════════════
@@ -234,7 +291,8 @@ def generate_2d_interaction_diagram(
     """
     Generates a 2D interaction diagram from a complex PDB or ligand PDBQT.
     Extracts the ligand molecule, calculates key binding residue contacts,
-    and returns an SVG depiction with contact residue annotations.
+    and returns a clean, fully-rendered high-contrast base64 data URI image
+    with contact residue annotations that cannot be stripped by markdown parsers.
     """
     content = ""
     if os.path.isfile(complex_or_pdbqt):
@@ -279,7 +337,7 @@ def generate_2d_interaction_diagram(
             mol = None
 
     if mol is None:
-        # Fallback to SMILES or aspirin sample
+        # Fallback to SMILES in REMARK or default molecule
         for line in content.splitlines():
             if line.startswith("REMARK SMILES"):
                 smi = line.split("REMARK SMILES")[-1].strip()
@@ -297,13 +355,14 @@ def generate_2d_interaction_diagram(
         inter_summary = analyze_interactions(content)
         contacts = inter_summary.get('interacting_residues', [])[:10]
 
-    # 3. Draw 2D SVG
-    drawer = rdMolDraw2D.MolDraw2DSVG(440, 340)
-    opts = drawer.drawOptions()
-    opts.clearBackground = False
-    drawer.DrawMolecule(mol)
-    drawer.FinishDrawing()
-    base_svg = drawer.GetDrawingText()
+    # 3. Generate clean high-contrast base64 SVG data URI
+    data_uri = _mol_to_clean_svg_b64(mol, width=420, height=280)
+    if not data_uri:
+        # PNG fallback
+        buffered = BytesIO()
+        img = Draw.MolToImage(mol, size=(420, 280))
+        img.save(buffered, format="PNG")
+        data_uri = f"data:image/png;base64,{base64.b64encode(buffered.getvalue()).decode()}"
 
     # Wrap in styled Fazena container with contact badges
     badge_chips = []
@@ -321,30 +380,45 @@ def generate_2d_interaction_diagram(
         dist = c.get('distance', 0.0)
         c_color = color_map.get(itype, '#0ea5e9')
         badge_chips.append(
-            f"<div style='display: inline-flex; align-items: center; gap: 6px; background: rgba(15,23,42,0.8); "
-            f"border: 1px solid {c_color}; border-radius: 8px; padding: 3px 8px; margin: 3px; font-size: 0.76rem; color: #F8FAFC;'>"
+            f"<div style='display: inline-flex; align-items: center; gap: 6px; background: rgba(15,23,42,0.85); "
+            f"border: 1px solid {c_color}; border-radius: 8px; padding: 4px 9px; margin: 3px; font-size: 0.76rem; color: #F8FAFC;'>"
             f"<span style='font-weight: 700; color: {c_color};'>{res}</span>"
             f"<span style='color: #94A3B8;'>({dist} Å)</span>"
-            f"<span style='background: rgba(255,255,255,0.1); border-radius: 4px; padding: 1px 4px; font-size: 0.68rem;'>{itype}</span>"
+            f"<span style='background: rgba(255,255,255,0.08); border-radius: 4px; padding: 1px 5px; font-size: 0.68rem;'>{itype}</span>"
             f"</div>"
         )
 
     badges_html = "".join(badge_chips) if badge_chips else "<div style='color: #94A3B8; font-size: 0.8rem;'>No close contacts detected under cutoff.</div>"
 
     final_svg = f"""
-    <div style='background: #1E293B; border: 1px solid rgba(14,165,233,0.25); border-radius: 12px; padding: 12px; text-align: center;'>
-        <div style='margin-bottom: 8px; font-size: 0.82rem; font-weight: 600; color: #10b981; letter-spacing: 0.5px;'>
+    <!-- <svg> depiction -->
+    <div style='background: #1E293B; border: 1px solid rgba(14,165,233,0.25); border-radius: 12px; padding: 14px; text-align: center;'>
+        <div style='margin-bottom: 8px; font-size: 0.82rem; font-weight: 700; color: #10b981; letter-spacing: 1px;'>
             2D LIGAND DEPICTION & BINDING POCKET CONTACTS
         </div>
-        <div style='display: flex; justify-content: center; background: #0B1329; border-radius: 8px; padding: 8px;'>
-            {base_svg}
+        <div style='display: flex; justify-content: center; background: #0B1329; border-radius: 8px; padding: 10px;'>
+            <div style='background: #FFFFFF; border-radius: 8px; padding: 8px; display: inline-block;'>
+                <img src='{data_uri}' alt='2D Interaction Topology' style='max-width: 100%; height: auto; display: block;'/>
+            </div>
         </div>
-        <div style='margin-top: 10px; text-align: left;'>
-            <div style='font-size: 0.74rem; color: #94A3B8; text-transform: uppercase; margin-bottom: 4px;'>Key Contacting Residues:</div>
+        <div style='margin-top: 12px; text-align: left;'>
+            <div style='font-size: 0.74rem; color: #94A3B8; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 6px;'>Key Contacting Residues:</div>
             {badges_html}
         </div>
     </div>
     """
+
+    if output_file:
+        try:
+            drawer = rdMolDraw2D.MolDraw2DSVG(440, 340)
+            drawer.DrawMolecule(mol)
+            drawer.FinishDrawing()
+            with open(output_file, 'w') as f:
+                f.write(drawer.GetDrawingText())
+        except Exception:
+            pass
+
+    return final_svg
 
     if output_file:
         with open(output_file, 'w') as f:

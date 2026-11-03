@@ -7,6 +7,8 @@ Affiliation: Institute of Cell Biology NASU
 
 from typing import List, Dict, Any, Tuple, Optional
 import os
+import subprocess
+import shutil
 import tempfile
 import math
 import numpy as np
@@ -279,8 +281,46 @@ def convert_pose_pdbqt_to_pdb(pose_pdbqt: str) -> str:
     return "\n".join(pdb_lines) + "\nEND\n"
 
 # ═════════════════════════════════════════════════════════════════════
-# DOCKING EXECUTION
+# DOCKING EXECUTION & HARDWARE ACCELERATION
 # ═════════════════════════════════════════════════════════════════════
+
+def find_vina_gpu_binary(custom_path: Optional[str] = None) -> Optional[str]:
+    """
+    Discovers AutoDock-Vina-GPU, Vina-GPU 2.1, or QuickVina-GPU binaries on the host system.
+    Searches user custom path, PATH environment, and common user/local directories.
+    """
+    if custom_path and os.path.isfile(custom_path) and os.access(custom_path, os.X_OK):
+        return custom_path
+
+    candidates = [
+        "AutoDock-Vina-GPU-2-1",
+        "AutoDock-Vina-GPU",
+        "vina-gpu",
+        "vina_gpu",
+        "QuickVina2-GPU",
+        "Vina-GPU",
+        "AutoDock-Vina-GPU-2.1"
+    ]
+    for name in candidates:
+        found = shutil.which(name)
+        if found:
+            return found
+
+    user_home = os.path.expanduser("~")
+    local_paths = [
+        os.path.join(user_home, "bin", "AutoDock-Vina-GPU-2-1"),
+        os.path.join(user_home, ".local", "bin", "AutoDock-Vina-GPU-2-1"),
+        os.path.join(user_home, "AutoDock-Vina-GPU-2.1", "AutoDock-Vina-GPU-2-1"),
+        os.path.join(user_home, "bioinfo_soft", "AutoDock-Vina-GPU-2-1"),
+        "/usr/local/bin/AutoDock-Vina-GPU-2-1",
+        "/usr/local/bin/vina-gpu"
+    ]
+    for p in local_paths:
+        if os.path.isfile(p) and os.access(p, os.X_OK):
+            return p
+
+    return None
+
 
 def dock_single_compound(
     receptor_pdb: str,
@@ -293,12 +333,15 @@ def dock_single_compound(
     seed: int = 0,
     cpu: Optional[int] = None,
     sf_name: str = "vina",
-    is_rna: bool = False
+    is_rna: bool = False,
+    engine_mode: str = "vina",
+    gpu_threads: int = 8000,
+    vina_gpu_bin: Optional[str] = None
 ) -> Dict[str, Any]:
     """
-    Executes AutoDock Vina docking for a single ligand against a protein or RNA receptor.
-    Supports user-customized grid box coordinates, exhaustiveness, pose count, seed, and CPU threads.
-    Returns affinities, Ki, docked pose PDBQT, and merged complex PDB.
+    Executes AutoDock Vina or AutoDock Vina-GPU docking for a single ligand against a receptor.
+    Supports user-customized grid box, exhaustiveness, pose count, seed, CPU threads, and CUDA Vina-GPU.
+    Returns affinities, Ki, docked pose PDBQT, merged complex PDB, and engine telemetry.
     """
     if grid_box is None:
         grid_box = calculate_grid_box(receptor_pdb)
@@ -316,6 +359,88 @@ def dock_single_compound(
         with open(rec_file, "w") as f:
             f.write(rec_pdbqt)
 
+        center = [float(grid_box['center_x']), float(grid_box['center_y']), float(grid_box['center_z'])]
+        box_size = [float(grid_box['size_x']), float(grid_box['size_y']), float(grid_box['size_z'])]
+
+        # Check for Vina-GPU execution
+        gpu_bin = find_vina_gpu_binary(vina_gpu_bin) if engine_mode == "vina_gpu" else None
+
+        if gpu_bin:
+            try:
+                lig_file = os.path.join(tmpdir, "ligand.pdbqt")
+                with open(lig_file, "w") as f:
+                    f.write(lig_pdbqt)
+
+                out_file = os.path.join(tmpdir, "docked_poses.pdbqt")
+                cmd = [
+                    gpu_bin,
+                    "--receptor", rec_file,
+                    "--ligand", lig_file,
+                    "--center_x", str(center[0]),
+                    "--center_y", str(center[1]),
+                    "--center_z", str(center[2]),
+                    "--size_x", str(box_size[0]),
+                    "--size_y", str(box_size[1]),
+                    "--size_z", str(box_size[2]),
+                    "--thread", str(max(1000, int(gpu_threads))),
+                    "--out", out_file
+                ]
+                if seed:
+                    cmd.extend(["--seed", str(seed)])
+
+                proc = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=180)
+                if os.path.isfile(out_file) and os.path.getsize(out_file) > 0:
+                    with open(out_file, 'r') as f:
+                        poses_pdbqt = f.read()
+
+                    energies = []
+                    for line in poses_pdbqt.splitlines():
+                        if "REMARK VINA RESULT:" in line:
+                            parts = line.split()
+                            try:
+                                idx = parts.index("RESULT:") + 1
+                                energies.append([float(parts[idx])])
+                            except Exception:
+                                pass
+
+                    if energies:
+                        best_affinity = round(float(energies[0][0]), 2)
+                        r_const = 1.9872e-3
+                        temp = 298.15
+                        ki_molar = math.exp(best_affinity / (r_const * temp))
+                        if ki_molar < 1e-6:
+                            ki_str = f"{ki_molar * 1e9:.2f} nM"
+                        elif ki_molar < 1e-3:
+                            ki_str = f"{ki_molar * 1e6:.2f} µM"
+                        else:
+                            ki_str = f"{ki_molar * 1e3:.2f} mM"
+
+                        top_pose_pdbqt = poses_pdbqt.split("ENDMDL")[0] + "\nENDMDL\n"
+                        top_pose_pdb = convert_pose_pdbqt_to_pdb(top_pose_pdbqt)
+
+                        clean_rec_lines = [l for l in receptor_pdb.splitlines() if not l.startswith(('END', 'CONECT'))]
+                        clean_lig_lines = [l for l in top_pose_pdb.splitlines() if l.startswith(('ATOM', 'HETATM'))]
+                        complex_pdb = "\n".join(clean_rec_lines) + "\n" + "\n".join(clean_lig_lines) + "\nEND\n"
+
+                        return {
+                            'status': 'Success',
+                            'name': compound_name,
+                            'SMILES': ligand_smiles,
+                            'affinity': best_affinity,
+                            'ki_estimated': ki_str,
+                            'energies_all': [round(float(e[0]), 2) for e in energies],
+                            'top_pose_pdbqt': top_pose_pdbqt,
+                            'top_pose_pdb': top_pose_pdb,
+                            'complex_pdb': complex_pdb,
+                            'grid_box': grid_box,
+                            'exhaustiveness': exhaustiveness,
+                            'seed': seed,
+                            'scoring_function': 'vina',
+                            'engine_used': 'AutoDock Vina-GPU (NVIDIA CUDA)'
+                        }
+            except Exception:
+                pass  # Gracefully fall back to multi-core Vina engine
+
         try:
             if cpu is None or cpu <= 0:
                 cpu_count = min(os.cpu_count() or 4, 8)
@@ -329,10 +454,7 @@ def dock_single_compound(
             v.set_receptor(rec_file)
             v.set_ligand_from_string(lig_pdbqt)
 
-            center = [float(grid_box['center_x']), float(grid_box['center_y']), float(grid_box['center_z'])]
-            box_size = [float(grid_box['size_x']), float(grid_box['size_y']), float(grid_box['size_z'])]
             v.compute_vina_maps(center=center, box_size=box_size)
-
             v.dock(exhaustiveness=max(1, int(exhaustiveness)), n_poses=max(1, int(n_poses)))
             energies = v.energies(n_poses=max(1, int(n_poses)), energy_range=float(energy_range))
             poses_pdbqt = v.poses(n_poses=max(1, int(n_poses)))
@@ -360,6 +482,10 @@ def dock_single_compound(
             clean_lig_lines = [l for l in top_pose_pdb.splitlines() if l.startswith(('ATOM', 'HETATM'))]
             complex_pdb = "\n".join(clean_rec_lines) + "\n" + "\n".join(clean_lig_lines) + "\nEND\n"
 
+            used_engine = "AutoDock Vina (CPU Multithreading)"
+            if engine_mode == "vina_gpu":
+                used_engine = "AutoDock Vina (High-Throughput CPU Fallback - compile AutoDock-Vina-GPU-2-1 for native CUDA kernel)"
+
             return {
                 'status': 'Success',
                 'name': compound_name,
@@ -373,7 +499,8 @@ def dock_single_compound(
                 'grid_box': grid_box,
                 'exhaustiveness': exhaustiveness,
                 'seed': seed,
-                'scoring_function': vina_sf
+                'scoring_function': vina_sf,
+                'engine_used': used_engine
             }
         except Exception as e:
             return {'status': 'Failed', 'error': str(e)}
@@ -390,8 +517,50 @@ def dock_top_candidates(
     cpu: Optional[int] = None,
     sf_name: str = "vina",
     is_rna: bool = False,
+    engine_mode: str = "vina",
+    gpu_threads: int = 8000,
+    vina_gpu_bin: Optional[str] = None,
     progress_callback = None
 ) -> List[Dict[str, Any]]:
+    """
+    Docks candidate compounds with customizable grid box, sampling, and acceleration engine.
+    Supports user-specified box dimensions, exhaustiveness, seeds, scoring functions, and Vina-GPU.
+    """
+    results = []
+    candidates_to_dock = candidates[:top_n]
+    if grid_box is None:
+        grid_box = calculate_grid_box(receptor_pdb)
+
+    for i, cand in enumerate(candidates_to_dock):
+        smiles = cand.get('SMILES', '')
+        name = cand.get('name', f"Hit_{i+1}")
+
+        if progress_callback:
+            progress_callback(i + 1, len(candidates_to_dock), name)
+
+        dock_res = dock_single_compound(
+            receptor_pdb=receptor_pdb,
+            ligand_smiles=smiles,
+            compound_name=name,
+            grid_box=grid_box,
+            exhaustiveness=exhaustiveness,
+            n_poses=n_poses,
+            energy_range=energy_range,
+            seed=seed,
+            cpu=cpu,
+            sf_name=sf_name,
+            is_rna=is_rna,
+            engine_mode=engine_mode,
+            gpu_threads=gpu_threads,
+            vina_gpu_bin=vina_gpu_bin
+        )
+        dock_res.update({k: v for k, v in cand.items() if k not in dock_res})
+        results.append(dock_res)
+
+    successful = [r for r in results if r.get('status') == 'Success']
+    failed = [r for r in results if r.get('status') != 'Success']
+    successful.sort(key=lambda x: x.get('affinity', 999.0))
+    return successful + failed
     """
     Docks candidate compounds with customizable grid box and search parameters.
     Supports user-specified box dimensions, exhaustiveness, seeds, and scoring functions.

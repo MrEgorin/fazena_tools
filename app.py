@@ -10,7 +10,6 @@ import streamlit as st
 # Configure page layout and metadata
 st.set_page_config(
     page_title="FAZENA Tools | Modular Drug Discovery Platform",
-    page_icon="🧬",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -40,14 +39,14 @@ def render_home_dashboard():
             powered by contrastive machine learning (ConPLex) and AutoDock Vina physics engines.
         </p>
         <div style='display: inline-flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-bottom: 1.5rem;'>
-            <span style='background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.25); color: #38bdf8; font-size: 0.78rem; padding: 3px 10px; border-radius: 12px;'>
-                🔒 100% Offline Real Weights & Physics
+            <span style='background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.25); color: #38bdf8; font-size: 0.78rem; padding: 3px 12px; border-radius: 12px; font-weight: 600;'>
+                Offline Local Compute & Physics
             </span>
-            <span style='background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; font-size: 0.78rem; padding: 3px 10px; border-radius: 12px;'>
-                🚫 Zero External General LLMs (No Gemini / GPT / Claude)
+            <span style='background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; font-size: 0.78rem; padding: 3px 12px; border-radius: 12px; font-weight: 600;'>
+                Zero External LLM Dependencies
             </span>
-            <span style='background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc; font-size: 0.78rem; padding: 3px 10px; border-radius: 12px;'>
-                🏛️ Institute of Cell Biology NASU
+            <span style='background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc; font-size: 0.78rem; padding: 3px 12px; border-radius: 12px; font-weight: 600;'>
+                Institute of Cell Biology NASU
             </span>
         </div>
     </div>
@@ -58,7 +57,7 @@ def render_home_dashboard():
     with col1:
         st.markdown("""
         <div class='capability-card' style='height: 100%; border-top: 3px solid #10b981;'>
-            <div class='cap-icon'>🧬</div>
+            <div style='font-size: 0.8rem; font-weight: 700; color: #10b981; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase;'>MODULE 01</div>
             <div class='cap-title' style='color: #10b981;'>RNA Hunter</div>
             <div class='cap-desc'>
                 Structure-agnostic virtual screening and nucleotide-resolution binding site discovery 
@@ -70,11 +69,11 @@ def render_home_dashboard():
     with col2:
         st.markdown("""
         <div class='capability-card' style='height: 100%; border-top: 3px solid #0ea5e9;'>
-            <div class='cap-icon'>🔬</div>
+            <div style='font-size: 0.8rem; font-weight: 700; color: #0ea5e9; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase;'>MODULE 02</div>
             <div class='cap-title' style='color: #0ea5e9;'>Prozena</div>
             <div class='cap-desc'>
                 High-throughput screening against protein targets using the ConPLex contrastive co-embedding model,
-                integrated with Lipinski/PAINS ADMET filtering and automated Top-5 AutoDock Vina docking.
+                integrated with Lipinski/PAINS ADMET filtering and automated AutoDock Vina/Vina-GPU docking.
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -82,10 +81,10 @@ def render_home_dashboard():
     with col3:
         st.markdown("""
         <div class='capability-card' style='height: 100%; border-top: 3px solid #38bdf8;'>
-            <div class='cap-icon'>🔄</div>
+            <div style='font-size: 0.8rem; font-weight: 700; color: #38bdf8; letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase;'>MODULE 03</div>
             <div class='cap-title' style='color: #38bdf8;'>Refazenation</div>
             <div class='cap-desc'>
-                Fast biological target prediction (SwissTargetPrediction alternative) and multi-target reverse docking
+                Target prediction across high-coverage human and pathogen proteomes and multi-target reverse docking
                 across therapeutic classes to identify polypharmacology and repurposing candidates.
             </div>
         </div>
@@ -95,7 +94,7 @@ def render_home_dashboard():
 
     # System Status & Hardware Card
     st.markdown("<div class='fazena-card'>", unsafe_allow_html=True)
-    st.markdown("### ⚙️ System & Engine Diagnostics")
+    st.markdown("### System & Hardware Diagnostics")
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Platform OS", HARDWARE.get('os', 'Linux'))
     c2.metric("Python Runtime", HARDWARE.get('python_version', '3.10'))
