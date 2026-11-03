@@ -280,5 +280,56 @@ END
         self.assertFalse(viral_hits.empty)
         self.assertTrue((viral_hits['Organism'] == 'Viral').all())
 
+    def test_comtarget_engine_and_combinatorial_docking(self):
+        from modules.comtarget_engine import (
+            compute_c3dd_descriptors,
+            predict_comtarget_targets,
+            get_target_box,
+            get_native_score,
+            evaluate_delta_score,
+            get_all_comtarget_targets_df
+        )
+        from modules.refazenation import DrugRepurposing
+
+        # 1. Test 3D C3DD Descriptors Calculation
+        aspirin_smi = "CC(=O)Oc1ccccc1C(=O)O"
+        desc = compute_c3dd_descriptors(aspirin_smi)
+        self.assertIsNotNone(desc)
+        self.assertEqual(len(desc), 10)
+        self.assertGreater(desc[0], 50.0)  # Surface area > 50 A^2
+        self.assertGreater(desc[1], 100.0) # Volume > 100 A^3
+
+        # 2. Test 26,000+ Target Prediction Screening
+        df_pred = predict_comtarget_targets(aspirin_smi, top_k=5)
+        self.assertEqual(len(df_pred), 5)
+        self.assertIn("PDB ID", df_pred.columns)
+        self.assertIn("ComTarget 3D Similarity", df_pred.columns)
+        self.assertIn("Pocket Center (X, Y, Z)", df_pred.columns)
+
+        # 3. Test Grid Box Retrieval
+        box_1iep = get_target_box("1IEP")
+        self.assertIsNotNone(box_1iep)
+        self.assertIn("center_x", box_1iep)
+        self.assertIn("size_x", box_1iep)
+
+        # 4. Test Native Baseline Score & Delta Score
+        score_1iep = get_native_score("1IEP")
+        self.assertIsNotNone(score_1iep)
+        self.assertIn("best_score", score_1iep)
+
+        delta_eval = evaluate_delta_score(-14.5, "1IEP")
+        self.assertEqual(delta_eval["category"], "HIGH")
+        self.assertLessEqual(delta_eval["delta_score"], 0.0)
+
+        # 5. Test Full Database Retrieval
+        full_df = get_all_comtarget_targets_df()
+        self.assertGreaterEqual(len(full_df), 25000)
+
+        # 6. Test DrugRepurposing programmatic API with ComTarget
+        dr = DrugRepurposing(default_engine="comtarget")
+        res = dr.predict(aspirin_smi, top_k=3)
+        self.assertEqual(res["engine"], "comtarget")
+        self.assertEqual(len(res["predicted_targets"]), 3)
+
 if __name__ == '__main__':
     unittest.main()

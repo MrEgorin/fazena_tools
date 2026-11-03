@@ -834,12 +834,14 @@ def render_footer():
             <span style="background: rgba(14, 165, 233, 0.12); border: 1px solid rgba(14, 165, 233, 0.35); color: #38bdf8; padding: 5px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
                 👨‍💻 Yehor Franchuk (MrEgorin)
             </span>
-            <span style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); color: #c084fc; padding: 5px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
-                🏛️ Institute of Cell Biology NASU
-            </span>
+            <a href="http://cellbiol.lviv.ua" target="_blank" style="text-decoration: none;">
+                <span style="background: rgba(168, 85, 247, 0.12); border: 1px solid rgba(168, 85, 247, 0.35); color: #c084fc; padding: 5px 12px; border-radius: 20px; font-size: 0.82rem; font-weight: 500; display: inline-flex; align-items: center; gap: 6px;">
+                    🏛️ Institute of Cell Biology NASU &bull; cellbiol.lviv.ua
+                </span>
+            </a>
         </div>
         <div style="color: var(--fz-text-dim); font-size: 0.76rem; letter-spacing: 0.5px; line-height: 1.6;">
-            Next-Generation Modular Drug Discovery Foundry &bull; <a href="https://www.fazena.org" target="_blank" style="color: var(--fz-accent); text-decoration: none;">fazena.org</a><br>
+            Next-Generation Modular Drug Discovery Foundry &bull; <a href="https://www.fazena.org" target="_blank" style="color: var(--fz-accent); text-decoration: none;">fazena.org</a> &bull; <a href="http://cellbiol.lviv.ua" target="_blank" style="color: #c084fc; text-decoration: none;">cellbiol.lviv.ua</a><br>
             All AI inferences and physics-based AutoDock Vina calculations execute strictly on local models and trained weights.
         </div>
     </div>

@@ -245,7 +245,8 @@ OK
 ## Authors and Citation
 
 Developed by **Yehor Franchuk, MrEgorin, and the FAZENA Team**.  
-Official Website: [https://fazena.org](https://fazena.org)
+- **Affiliation:** Institute of Cell Biology, National Academy of Sciences of Ukraine ([cellbiol.lviv.ua](http://cellbiol.lviv.ua))  
+- **Official Website:** [https://fazena.org](https://fazena.org)  
 
 If you use FAZENA Tools in your academic or industrial research, please cite:
 

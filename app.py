@@ -45,9 +45,11 @@ def render_home_dashboard():
             <span style='background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); color: #34d399; font-size: 0.78rem; padding: 3px 12px; border-radius: 12px; font-weight: 600;'>
                 Zero External LLM Dependencies
             </span>
-            <span style='background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc; font-size: 0.78rem; padding: 3px 12px; border-radius: 12px; font-weight: 600;'>
-                Institute of Cell Biology NASU
-            </span>
+            <a href="http://cellbiol.lviv.ua" target="_blank" style="text-decoration: none;">
+                <span style='background: rgba(168, 85, 247, 0.1); border: 1px solid rgba(168, 85, 247, 0.25); color: #c084fc; font-size: 0.78rem; padding: 3px 12px; border-radius: 12px; font-weight: 600;'>
+                    🏛️ Institute of Cell Biology NASU &bull; cellbiol.lviv.ua
+                </span>
+            </a>
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -163,7 +165,7 @@ def main():
             <b style="color: #10b981;">FAZENA Discovery Suite</b><br>
             Developed by <a href="https://www.fazena.org" target="_blank" style="color: var(--fz-accent); text-decoration: none; font-weight: 600;">FAZENA</a><br>
             <span>Lead: <b>Yehor Franchuk (MrEgorin)</b></span><br>
-            <span style="opacity: 0.9; color: #a855f7;">Institute of Cell Biology NASU</span>
+            <a href="http://cellbiol.lviv.ua" target="_blank" style="text-decoration: none; opacity: 0.9; color: #a855f7;">🏛️ Institute of Cell Biology NASU (cellbiol.lviv.ua)</a>
         </div>
         """, unsafe_allow_html=True)
 
